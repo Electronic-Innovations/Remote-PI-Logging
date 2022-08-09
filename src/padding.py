@@ -1,11 +1,21 @@
+'''
+Contains functions for creadting a padded .txt file where required.
 
+mkTimeList
+    creates a list of strings containg all the timestamps in the raw data
+
+checktimes
+    looks at a list of timestamps and uses the pre-defined time_difference to determine if they have any anomalies. Creates a structured list of lits to pass information as to how to pad the data to make it continous.
+    
+mkPaddata
+    Uses the padlist provided from checktimes to create a padded data file (if required)
+'''
 
 
 
 
 import datetime
 import re
-
 
 
 def mkTimeList(filenametxt):

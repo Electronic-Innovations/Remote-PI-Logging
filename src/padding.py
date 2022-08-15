@@ -24,6 +24,8 @@ class PADDING:
         self.time_difference = 8
         self.rows = 8
         self.filenametxt = filenametxt
+        self.drows =[]
+        self.diff_array =[]
     # Collectes all the time stamps in the data
     def mkTimeList(self):
         newtimestext =[]
@@ -35,16 +37,38 @@ class PADDING:
         for line in lines:
             if line.find('%') !=-1:
                 newtimestext.append(line[line.find('%'):(len(line)-1)])
-                drows.append(count)
+                self.drows.append(count)
                 count = 0
                 started = True
             count +=1
-        print(drows)
-        self.rows = (round(statistics.mean(drows)))
+        for items in newtimestext:
+            if items is False:
+                exit(-2)
+        try:
+            self.rows = (round(statistics.mean(drows)))
+        except Exception as e1:
+            pass
         return newtimestext
 
-
-
+    def calcTimedif(self, timelist):
+        temp =[]
+        datetimelist = []
+        diff_array =[]
+        for idy, y in enumerate(timelist):
+            temp.append(re.findall(r'\d+', timelist[idy]))
+        for date in temp:
+            try:
+                struct = datetime.datetime(int(date[0]),int(date[1]),int(date[2]),int(date[3]),int(date[4]),int(date[5]))
+            except Exception as e3:
+                struct = 'False'
+            datetimelist.append(struct)
+        for idx, x in enumerate(datetimelist):
+            if idx ==0:
+                continue
+            if datetimelist[idx] == 'False' or datetimelist[idx-1] =='False':
+                continue
+            self.diff_array.append((datetimelist[idx]-datetimelist[idx-1]).seconds)
+        self.time_difference = round(statistics.mean(self.diff_array))
 
 
     # Function used to compare each timestaped and determine where padding is required
@@ -231,12 +255,45 @@ class PADDING:
 
 
 
-class TestTimeList(unit.TestCase):
+class TestTimeList(unittest.TestCase):
 
     def setUp(self):
-        self.PAD = PADDING('test')
+        self.PAD = PADDING('test.txt')
 
 
     def test_list_times(self):
-        
+        list = PADDING.mkTimeList(self.PAD)
+        for items in list:
+            self.assertTrue(items)
     
+    def test_empty_file(self):
+        self.PAD.filenametxt = 'empty.txt'
+        list = PADDING.mkTimeList(self.PAD)
+        for items in list:
+            self.assertFalse(items)
+
+    def test_row_count(self):
+        self.PAD.filenametxt = 'rowtest.txt'
+        list = PADDING.mkTimeList(self.PAD)
+        self.assertAlmostEqual(self.PAD.drows[0],3)
+        self.assertAlmostEqual(self.PAD.drows[1],8)
+        self.assertAlmostEqual(self.PAD.drows[2],6)
+        self.assertAlmostEqual(self.PAD.drows[3],8)
+        self.assertAlmostEqual(self.PAD.drows[4],10)
+
+    def test_row_avg(self):
+        list = PADDING.mkTimeList(self.PAD)
+        self.assertIs(self.PAD.rows,8)
+
+class TestcheckTimediff(unittest.TestCase):
+    
+    def setUp(self):
+        self.PAD = PADDING('test.txt')
+        
+    def test_diff_array(self):
+        self.PAD.calcTimedif(PADDING.mkTimeList(self.PAD))
+        self.assertIsInstance(self.PAD.diff_array[0],int)
+    def test_diff_array_average(self):
+        self.PAD.time_difference=0
+        self.PAD.calcTimedif(PADDING.mkTimeList(self.PAD))
+        self.assertEqual(self.PAD.time_difference,8)

@@ -26,6 +26,7 @@ class PADDING:
         self.filenametxt = filenametxt
         self.drows =[]
         self.diff_array =[]
+        self.datetimelist =[]
     # Collectes all the time stamps in the data
     def mkTimeList(self):
         newtimestext =[]
@@ -52,7 +53,7 @@ class PADDING:
 
     def calcTimedif(self, timelist):
         temp =[]
-        datetimelist = []
+        datelist = []
         diff_array =[]
         for idy, y in enumerate(timelist):
             temp.append(re.findall(r'\d+', timelist[idy]))
@@ -61,13 +62,13 @@ class PADDING:
                 struct = datetime.datetime(int(date[0]),int(date[1]),int(date[2]),int(date[3]),int(date[4]),int(date[5]))
             except Exception as e3:
                 struct = 'False'
-            datetimelist.append(struct)
-        for idx, x in enumerate(datetimelist):
+            datelist.append(struct)
+        for idx, x in enumerate(datelist):
             if idx ==0:
                 continue
-            if datetimelist[idx] == 'False' or datetimelist[idx-1] =='False':
+            if datelist[idx] == 'False' or datelist[idx-1] =='False':
                 continue
-            self.diff_array.append((datetimelist[idx]-datetimelist[idx-1]).seconds)
+            self.diff_array.append((datelist[idx]-datelist[idx-1]).seconds)
         self.time_difference = round(statistics.mean(self.diff_array))
 
 
@@ -75,12 +76,11 @@ class PADDING:
     # Returns a list of list indicating how to pad the raw data where each list item has:
     # [start padding at time, for this many rows, skip this many timestamps, stop paddding at this time stamp]
     # For and Erased section of memroy the List looks like: ['Erased', num rows, recording start time]
-    def checktimes(self,timelist, time_difference):
+    def checktimes(self,timelist):
         temppad = []
         pad = []
         skip = 0;
         temp =[]
-        datetimelist = []
         Erased = False
         for idy, y in enumerate(timelist):
             temp.append(re.findall(r'\d+', timelist[idy]))
@@ -89,44 +89,44 @@ class PADDING:
                 struct = datetime.datetime(int(date[0]),int(date[1]),int(date[2]),int(date[3]),int(date[4]),int(date[5]))
             except Exception as e3:
                 struct = 'False'
-            datetimelist.append(struct)
-        for idx, x in enumerate(datetimelist):
+            self.datetimelist.append(struct)
+        for idx, x in enumerate(self.datetimelist):
             if idx == 0:
-                if datetimelist[idx] == 'False':
+                if self.datetimelist[idx] == 'False':
                     Erased = True
                     temppad.append('Erased')
-                    temppad.append(time_difference)
+                    temppad.append(self.time_difference)
                 continue
             if Erased:
-                if datetimelist[idx] == 'False':
-                    temppad[1] += time_difference
+                if self.datetimelist[idx] == 'False':
+                    temppad[1] += self.time_difference
                 else:
                     Erased =False
-                    temppad[1] += time_difference
+                    temppad[1] += self.time_difference
                     temppad.append(datetimelist[idx+1])
                     pad.append(temppad)
                     temppad = []
                 continue
-            if datetimelist[idx] == 'False' and not Erased:
+            if self.datetimelist[idx] == 'False' and not Erased:
                 skip += 1
                 continue
             if skip == 0:
-                diff = datetimelist[idx]-datetimelist[idx-1]
-                if diff.total_seconds() > time_difference + 1:
-                    temppad.append(datetimelist[idx-1])
+                diff = self.datetimelist[idx]-self.datetimelist[idx-1]
+                if diff.total_seconds() > self.time_difference + 1:
+                    temppad.append(self.datetimelist[idx-1])
                     temppad.append(diff.total_seconds())
                     temppad.append(skip)
-                    temppad.append(datetimelist[idx])
+                    temppad.append(self.datetimelist[idx])
                     pad.append(temppad)
                     temppad = []
             if skip != 0:
                 print('skip num: ' + str(skip))
-                diff = datetimelist[idx]-datetimelist[idx-(1+skip)]
-                if diff.total_seconds() > time_difference + 1:
-                    temppad.append(datetimelist[idx-(1+skip)])
+                diff = self.datetimelist[idx]-self.datetimelist[idx-(1+skip)]
+                if diff.total_seconds() > self.time_difference + 1:
+                    temppad.append(self.datetimelist[idx-(1+skip)])
                     temppad.append(diff.total_seconds())
                     temppad.append(skip)
-                    temppad.append(datetimelist[idx+1])
+                    temppad.append(self.datetimelist[idx+1])
                     pad.append(temppad)
                     temppad = []
                 skip = 0;
@@ -297,3 +297,7 @@ class TestcheckTimediff(unittest.TestCase):
         self.PAD.time_difference=0
         self.PAD.calcTimedif(PADDING.mkTimeList(self.PAD))
         self.assertEqual(self.PAD.time_difference,8)
+
+class Testchecktimes(unittest.TestCase):
+    
+    

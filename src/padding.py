@@ -23,10 +23,20 @@ class PADDING:
     def __init__(self, filenametxt):
         self.time_difference = 8
         self.rows = 8
+        self.numberADCchannels =15
         self.filenametxt = filenametxt
         self.drows =[]
         self.diff_array =[]
         self.datetimelist =[]
+        self.padstring = '  00000'
+        self.pad =[]
+    
+    # Makes the padding string depending on the number of channels recorded
+    def mkpadstring():
+        for a in range(numberADCchannels-1):
+            self.padstring +='  00000'
+
+
     # Collectes all the time stamps in the data
     def mkTimeList(self):
         newtimestext =[]
@@ -41,6 +51,8 @@ class PADDING:
                 self.drows.append(count)
                 count = 0
                 started = True
+            elif count == 2 and started == True :
+                self.numberADCchannels = round(len(line)/len(self.padstring))
             count +=1
         for items in newtimestext:
             if items is False:
@@ -99,12 +111,12 @@ class PADDING:
                 continue
             if Erased:
                 if self.datetimelist[idx] == 'False':
-                    temppad[1] += self.time_difference
+                    temppad[1] += self.rows
                 else:
                     Erased =False
-                    temppad[1] += self.time_difference
-                    temppad.append(datetimelist[idx+1])
-                    pad.append(temppad)
+                    temppad[1] += self.rows
+                    temppad.append(self.datetimelist[idx+1])
+                    self.pad.append(temppad)
                     temppad = []
                 continue
             if self.datetimelist[idx] == 'False' and not Erased:
@@ -112,27 +124,32 @@ class PADDING:
                 continue
             if skip == 0:
                 diff = self.datetimelist[idx]-self.datetimelist[idx-1]
+                if diff > datetime.timedelta(days =1):
+                    self.pad = []
+                    temppad.append('Start')
+                    temppad.append(self.datetimelist[idx])
+                    self.pad.append(temppad)
+                    temppad =[]
                 if diff.total_seconds() > self.time_difference + 1:
                     temppad.append(self.datetimelist[idx-1])
-                    temppad.append(diff.total_seconds())
+                    temppad.append(round((diff.total_seconds()/self.time_difference)*self.rows))
                     temppad.append(skip)
                     temppad.append(self.datetimelist[idx])
-                    pad.append(temppad)
+                    self.pad.append(temppad)
                     temppad = []
             if skip != 0:
                 print('skip num: ' + str(skip))
                 diff = self.datetimelist[idx]-self.datetimelist[idx-(1+skip)]
                 if diff.total_seconds() > self.time_difference + 1:
                     temppad.append(self.datetimelist[idx-(1+skip)])
-                    temppad.append(diff.total_seconds())
+                    temppad.append(round((diff.total_seconds()/self.time_difference)*self.rows))
                     temppad.append(skip)
                     temppad.append(self.datetimelist[idx+1])
-                    pad.append(temppad)
+                    self.pad.append(temppad)
                     temppad = []
                 skip = 0;
-        if len(pad) == 0:
-            pad = [['False']]
-        return pad
+        if len(self.pad) == 0:
+            self.pad = [['False']]
 
 
 
@@ -280,6 +297,10 @@ class TestTimeList(unittest.TestCase):
         self.assertAlmostEqual(self.PAD.drows[2],6)
         self.assertAlmostEqual(self.PAD.drows[3],8)
         self.assertAlmostEqual(self.PAD.drows[4],10)
+    
+    def test_data_column(self):
+        list = PADDING.mkTimeList(self.PAD)
+        self.assertEqual(self.PAD.numberADCchannels,15)
 
     def test_row_avg(self):
         list = PADDING.mkTimeList(self.PAD)
@@ -300,4 +321,66 @@ class TestcheckTimediff(unittest.TestCase):
 
 class Testchecktimes(unittest.TestCase):
     
-    
+    def test_erased_padlist(self):
+        self.PAD = PADDING('2022-08-15__08_00test.txt')
+        temp =PADDING.mkTimeList(self.PAD)
+        self.PAD.calcTimedif(temp)
+        self.PAD.checktimes(temp)
+        self.assertEqual(self.PAD.pad[0][0],'Erased')
+
+    def test_pad_padlist(self):
+        self.PAD = PADDING('2022-08-15__08_00skip.txt')
+        temp =PADDING.mkTimeList(self.PAD)
+        self.PAD.calcTimedif(temp)
+        self.PAD.checktimes(temp)
+        self.assertEqual(self.PAD.pad[0][0],datetime.datetime(2022,8,15,16,17,50))
+        self.assertEqual(self.PAD.pad[0][1],30)
+        self.assertEqual(self.PAD.pad[0][2],0)
+        self.assertEqual(self.PAD.pad[0][3],datetime.datetime(2022,8,15,16,18,54))
+
+    def test_old_data_padlist(self):
+        self.PAD = PADDING('2022-08-15__08_00old.txt')
+        temp =PADDING.mkTimeList(self.PAD)
+        self.PAD.calcTimedif(temp)
+        self.PAD.checktimes(temp)
+        self.assertEqual(self.PAD.pad[0][1],datetime.datetime(2022,8,17,16,58,55))
+        self.assertEqual(self.PAD.pad[0][0],'Start')
+
+    def test_erased_pad(self):
+        self.PAD = PADDING('2022-08-15__08_00test.txt')
+        temp =PADDING.mkTimeList(self.PAD)
+        self.PAD.calcTimedif(temp)
+        self.PAD.checktimes(temp)
+        self.assertEqual(self.PAD.pad[0][0],'Erased')
+        self.assertEqual(self.PAD.pad[1][0],datetime.datetime(2022,8,15,16,43,58))
+        self.assertEqual(self.PAD.pad[1][1],40)
+        self.assertEqual(self.PAD.pad[1][2],0)
+        self.assertEqual(self.PAD.pad[1][3],datetime.datetime(2022,8,15,16,45,19))
+
+    def test_erased_old(self):
+        self.PAD = PADDING('2022-08-15__08_00terasedold.txt')
+        temp =PADDING.mkTimeList(self.PAD)
+        self.PAD.calcTimedif(temp)
+        self.PAD.checktimes(temp)
+        self.assertEqual(self.PAD.pad[0][1],datetime.datetime(2022,8,17,16,58,55))
+        self.assertEqual(self.PAD.pad[0][0],'Start')
+
+    def test_pad_old(self):
+        self.PAD = PADDING('2022-08-15__08_00old.txt')
+        temp =PADDING.mkTimeList(self.PAD)
+        self.PAD.calcTimedif(temp)
+        self.PAD.checktimes(temp)
+        self.assertEqual(self.PAD.pad[0][1],datetime.datetime(2022,8,17,16,58,55))
+        self.assertEqual(self.PAD.pad[0][0],'Start')
+
+    def test_old_pad(self):
+        self.PAD = PADDING('2022-08-15__08_00oldskip.txt')
+        temp =PADDING.mkTimeList(self.PAD)
+        self.PAD.calcTimedif(temp)
+        self.PAD.checktimes(temp)
+        self.assertEqual(self.PAD.pad[0][1],datetime.datetime(2022,8,17,16,58,55))
+        self.assertEqual(self.PAD.pad[0][0],'Start')
+        self.assertEqual(self.PAD.pad[2][0],datetime.datetime(2022,8,17,16,58,55))
+        self.assertEqual(self.PAD.pad[2][1],23)
+        self.assertEqual(self.PAD.pad[2][2],0)
+        self.assertEqual(self.PAD.pad[2][3],datetime.datetime(2022,8,17,16,59,43))

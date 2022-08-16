@@ -257,9 +257,12 @@ class PADDING:
                 done_padding = True
                         
 
-
         # Other forms of time stamp mismatch, (EDM was not recording for x time) padding out the length and time stamps of the file to make it continous
         if index == 0 or done_padding == False:
+            print(index)
+            if not os.path.exists(self.padfile):
+                with open(self.padfile,'w') as make:
+                    pass
             padcount =0
             padding = False
             skip = 0
@@ -448,3 +451,13 @@ class Testfilepadding(unittest.TestCase):
         self.PAD.mkPaddata('2022-08-15__08_00testEpad.txt')
         self.assertGreater(os.path.getsize('2022-08-15__08_00testE.txt'), os.path.getsize('2022-08-15__08_00testEpad.txt'))
         os.remove('2022-08-15__08_00testEpad.txt')
+
+    def test_skip_file(self):
+        self.PAD = PADDING('2022-08-15__08_00skip.txt')
+        temp =PADDING.mkTimeList(self.PAD)
+        self.PAD.calcTimedif(temp)
+        self.PAD.checktimes(temp)
+        self.PAD.mkpadstring()
+        self.PAD.mkPaddata('2022-08-15__08_00skipPad.txt')
+        self.assertGreater(os.path.getsize('2022-08-15__08_00skipPad.txt'),os.path.getsize('2022-08-15__08_00skip.txt'))
+        #os.remove('2022-08-15__08_00skipPad.txt')

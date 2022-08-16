@@ -18,7 +18,7 @@ import datetime
 import re
 import statistics
 import unittest
-
+import os
 class PADDING:
     def __init__(self, filenametxt):
         self.time_difference = 8
@@ -30,10 +30,11 @@ class PADDING:
         self.datetimelist =[]
         self.padstring = '  00000'
         self.pad =[]
+        self.padfile = ''
     
     # Makes the padding string depending on the number of channels recorded
-    def mkpadstring():
-        for a in range(numberADCchannels-1):
+    def mkpadstring(self):
+        for a in range(self.numberADCchannels-1):
             self.padstring +='  00000'
 
 
@@ -58,7 +59,7 @@ class PADDING:
             if items is False:
                 exit(-2)
         try:
-            self.rows = (round(statistics.mean(drows)))
+            self.rows = (round(statistics.mean(self.drows)))
         except Exception as e1:
             pass
         return newtimestext
@@ -155,24 +156,55 @@ class PADDING:
 
 
 
-    def mkPaddata(self,filenametxt, padfile, padlist, time_difference):
+    def mkPaddata(self, padfile):
+        index = 0
+        done_padding =False
+        self.padfile = padfile
         # No missing section or Erased data found copying straight to padfile
-        if padlist[0][0] == 'False':
-            with open(filenametxt, 'r') as raw:
+        if self.pad[0][0] == 'False':
+            with open(self.filenametxt, 'r') as raw:
                 lines = raw.readlines()
-                with open(padfile, 'w') as padded:
+                with open(self.padfile, 'w') as padded:
                     for line in lines:
                         padded.write(line)
+            done_padding = True
+# Large Gap in data (>1 day) skipping to new data
+        elif self.pad[0][0] == 'Start':
+            starttime = self.pad[0][1]
+            writing = False
+            with open(self.padfile, 'w') as padded:
+                with open(filenametxt, 'r') as raw:
+                    lines = raw.readlines()
+                    for line in lines:
+                        if writing:
+                            padded.write(line)
+                            continue
+                        if line.find('%') !=-1 and not writing:
+                            stamp = line[line.find('%'):(len(line)-1)]
+                            temp = (re.findall(r'\d+', stamp))
+                            try:
+                                struct = datetime.datetime(int(temp[0]),int(temp[1]),int(temp[2]),int(temp[3]),int(temp[4]),int(temp[5]))
+                            except Exception as e2:
+                                struct = 'False'
+                            if struct == 'False':
+                                pass
+                            elif struct == starttime:
+                                writing = True
+                                padded.write(line)
+            index = 1
+            
+
         # Erased data found padding file and adding time stamps retrocatively from oldest recorded time
-        elif padlist[0][0] == 'Erased':
-            starttime = padlist[0][2] - datetime.timedelta(seconds = padlist[0][1])
+        elif self.pad[0][0] == 'Erased':
+            starttime = self.pad[0][2] - datetime.timedelta(seconds = self.pad[0][1])
             padding = True
             writing = False
-            padnum = padlist[0][1]
+            index =1
+            padnum = self.pad[0][1]
             padcount = 0
             val = 0
-            with open(padfile, 'w') as padded:
-                with open(filenametxt, 'r') as raw:
+            with open(self.padfile, 'w') as padded:
+                with open(self.filenametxt, 'r') as raw:
                     lines = raw.readlines()
                     for line in lines:
                         if writing:
@@ -186,17 +218,17 @@ class PADDING:
                                 struct = 'False'
                             if struct == 'False':
                                 pass
-                            elif struct == padlist[0][2]:
+                            elif struct == self.pad[0][2]:
                                 while padding:
-                                    padded.write(padstring)
+                                    padded.write(self.padstring)
                                     if padcount == 0:
-                                        printtime = starttime + datetime.timedelta(seconds = time_difference*val)
+                                        printtime = starttime + datetime.timedelta(seconds = self.time_difference*val)
                                         padded.write('\t% '+printtime.strftime("%Y-%m-%d   %H:%M:%S")+'\n')
                                     else:
                                         padded.write('\n')
                                     padnum -=1
                                     padcount += 1
-                                    if padcount >(time_difference-1):
+                                    if padcount >(self.rows-1):
                                         val +=1
                                         padcount = 0
                                     if padnum == 0:
@@ -204,63 +236,82 @@ class PADDING:
                                 writing = True
                                 padded.write(line)
                         elif padding:
-                            padded.write(padstring)
+                            padded.write(self.padstring)
                             if padcount == 0:
-                                printtime = starttime + datetime.timedelta(seconds = time_difference*val)
+                                printtime = starttime + datetime.timedelta(seconds = self.time_difference*val)
                                 padded.write('\t% '+printtime.strftime("%Y-%m-%d   %H:%M:%S")+'\n')
                             else:
                                 padded.write('\n')
                             padnum -=1
                             padcount += 1
-                            if padcount >7:
+                            if padcount >self.rows-1:
                                 val +=1
                                 padcount = 0
                             if padnum == 0:
                                 pass
                                 #padding = False
                                 #writing = True
+            try:
+                test = self.pad[index]
+            except Exception as e4:
+                done_padding = True
                         
 
 
         # Other forms of time stamp mismatch, (EDM was not recording for x time) padding out the length and time stamps of the file to make it continous
-        else:
+        if index == 0 or done_padding == False:
             padcount =0
             padding = False
             skip = 0
-            writing = True
             val = 0
-            with open(filenametxt, 'r') as raw:
-                lines = raw.readlines()
-                with open(padfile, 'w') as padded:
+            with open(self.filenametxt, 'r') as raw:
+                if index == 0:
+                    writing = True
+                    lines = raw.readlines()
+                with open(self.padfile, 'r+') as padded:
+                    if index != 0:
+                        writing = False
+                        lines = padded.readlines()
+                        padded.seek(0)
                     for line in lines:
                         if line.find('%') !=-1:
                             stamp = line[line.find('%'):(len(line)-1)]
                             temp = (re.findall(r'\d+', stamp))
                             if skip == 0:
-                                struct = datetime.datetime(int(temp[0]),int(temp[1]),int(temp[2]),int(temp[3]),int(temp[4]),int(temp[5]))
+                                try:
+                                    struct = datetime.datetime(int(temp[0]),int(temp[1]),int(temp[2]),int(temp[3]),int(temp[4]),int(temp[5]))
+                                except Exception as e2:
+                                    struct = 'False'
+                                if struct == 'False':
+                                    writing = False
+                                    continue
+                                else:
+                                    writing = True
                                 if writing == False and struct == skipto:
                                     writing = True
-                                for idx, x in enumerate(padlist):
-                                    if struct == padlist[idx][0]:
+                                for idx in range(len(self.pad)):
+                                    if idx == 0:
+                                        continue
+                                    if struct == self.pad[idx][0]:
                                         padding = True
                                         writing = False
-                                        skip = padlist[idx][2]
-                                        skipto = padlist[idx][3]
-                                        padnum = padlist[idx][1] + 8
+                                        skip = self.pad[idx][2]
+                                        skipto = self.pad[idx][3]
+                                        padnum = self.pad[idx][1]
                                         
                                         break
                             else:
                                 skip -=1
                         while padding:
-                            padded.write(padstring)
+                            padded.write(self.padstring)
                             if padcount == 0:
-                                printtime = struct + datetime.timedelta(seconds = time_difference*val)
+                                printtime = struct + datetime.timedelta(seconds = self.time_difference*val)
                                 padded.write('\t% '+printtime.strftime("%Y-%m-%d   %H:%M:%S")+'\n')
                             else:
                                 padded.write('\n')
                             padnum -=1
                             padcount += 1
-                            if padcount >(time_difference-1):
+                            if padcount >(self.rows-1):
                                 val +=1
                                 padcount = 0
                             if padnum == 0:
@@ -304,7 +355,7 @@ class TestTimeList(unittest.TestCase):
 
     def test_row_avg(self):
         list = PADDING.mkTimeList(self.PAD)
-        self.assertIs(self.PAD.rows,8)
+        self.assertEqual(self.PAD.rows,8)
 
 class TestcheckTimediff(unittest.TestCase):
     
@@ -334,7 +385,7 @@ class Testchecktimes(unittest.TestCase):
         self.PAD.calcTimedif(temp)
         self.PAD.checktimes(temp)
         self.assertEqual(self.PAD.pad[0][0],datetime.datetime(2022,8,15,16,17,50))
-        self.assertEqual(self.PAD.pad[0][1],30)
+        self.assertEqual(self.PAD.pad[0][1],60)
         self.assertEqual(self.PAD.pad[0][2],0)
         self.assertEqual(self.PAD.pad[0][3],datetime.datetime(2022,8,15,16,18,54))
 
@@ -353,7 +404,7 @@ class Testchecktimes(unittest.TestCase):
         self.PAD.checktimes(temp)
         self.assertEqual(self.PAD.pad[0][0],'Erased')
         self.assertEqual(self.PAD.pad[1][0],datetime.datetime(2022,8,15,16,43,58))
-        self.assertEqual(self.PAD.pad[1][1],40)
+        self.assertEqual(self.PAD.pad[1][1],81)
         self.assertEqual(self.PAD.pad[1][2],0)
         self.assertEqual(self.PAD.pad[1][3],datetime.datetime(2022,8,15,16,45,19))
 
@@ -381,6 +432,19 @@ class Testchecktimes(unittest.TestCase):
         self.assertEqual(self.PAD.pad[0][1],datetime.datetime(2022,8,17,16,58,55))
         self.assertEqual(self.PAD.pad[0][0],'Start')
         self.assertEqual(self.PAD.pad[2][0],datetime.datetime(2022,8,17,16,58,55))
-        self.assertEqual(self.PAD.pad[2][1],23)
+        self.assertEqual(self.PAD.pad[2][1],45)
         self.assertEqual(self.PAD.pad[2][2],0)
         self.assertEqual(self.PAD.pad[2][3],datetime.datetime(2022,8,17,16,59,43))
+
+# Note that these test only asses the size of files not nessicarily their contents
+class Testfilepadding(unittest.TestCase):
+    
+    def test_erased_file(self):
+        self.PAD = PADDING('2022-08-15__08_00testE.txt')
+        temp =PADDING.mkTimeList(self.PAD)
+        self.PAD.calcTimedif(temp)
+        self.PAD.checktimes(temp)
+        self.PAD.mkpadstring()
+        self.PAD.mkPaddata('2022-08-15__08_00testEpad.txt')
+        self.assertGreater(os.path.getsize('2022-08-15__08_00testE.txt'), os.path.getsize('2022-08-15__08_00testEpad.txt'))
+        os.remove('2022-08-15__08_00testEpad.txt')

@@ -53,7 +53,7 @@ class EDMSerial:
 
         except Exception as e3:
             print(str(e3))
-            
+            exit(-2)
         try:
             #start timer to ensure the program doesn't get stuck
             tic=timeit.default_timer()

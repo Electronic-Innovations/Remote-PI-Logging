@@ -39,4 +39,5 @@ PAD.mkPaddata(padfile)
 
 #Create Appending object for appending
 APP = APPEND(PAD.padstring,PAD.time_difference,PAD.rows,padfile)
+APP.datatext = datatext
 APP.appendata()

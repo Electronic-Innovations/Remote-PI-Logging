@@ -173,7 +173,7 @@ class PADDING:
             starttime = self.pad[0][1]
             writing = False
             with open(self.padfile, 'w') as padded:
-                with open(filenametxt, 'r') as raw:
+                with open(self.filenametxt, 'r') as raw:
                     lines = raw.readlines()
                     for line in lines:
                         if writing:
@@ -259,7 +259,6 @@ class PADDING:
 
         # Other forms of time stamp mismatch, (EDM was not recording for x time) padding out the length and time stamps of the file to make it continous
         if index == 0 or done_padding == False:
-            print(index)
             if not os.path.exists(self.padfile):
                 with open(self.padfile,'w') as make:
                     pass
@@ -460,4 +459,24 @@ class Testfilepadding(unittest.TestCase):
         self.PAD.mkpadstring()
         self.PAD.mkPaddata('2022-08-15__08_00skipPad.txt')
         self.assertGreater(os.path.getsize('2022-08-15__08_00skipPad.txt'),os.path.getsize('2022-08-15__08_00skip.txt'))
-        #os.remove('2022-08-15__08_00skipPad.txt')
+        os.remove('2022-08-15__08_00skipPad.txt')
+        
+    def test_skip2_file(self):
+        self.PAD = PADDING('2022-08-15__08_00skip2.txt')
+        temp =PADDING.mkTimeList(self.PAD)
+        self.PAD.calcTimedif(temp)
+        self.PAD.checktimes(temp)
+        self.PAD.mkpadstring()
+        self.PAD.mkPaddata('2022-08-15__08_00skip2Pad.txt')
+        self.assertGreater(os.path.getsize('2022-08-15__08_00skip2Pad.txt'),os.path.getsize('2022-08-15__08_00skip2.txt'))
+        os.remove('2022-08-15__08_00skip2Pad.txt')
+
+    def test_olddata_file(self):
+        self.PAD = PADDING('2022-08-15__08_00old.txt')
+        temp =PADDING.mkTimeList(self.PAD)
+        self.PAD.calcTimedif(temp)
+        self.PAD.checktimes(temp)
+        self.PAD.mkpadstring()
+        self.PAD.mkPaddata('2022-08-15__08_00oldPad.txt')
+        self.assertGreater(os.path.getsize('2022-08-15__08_00old.txt'),os.path.getsize('2022-08-15__08_00oldPad.txt'))
+        os.remove('2022-08-15__08_00oldPad.txt')

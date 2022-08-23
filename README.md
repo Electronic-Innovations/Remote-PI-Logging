@@ -19,6 +19,6 @@ This program is for re-programming the EDM from the RPi, it is called using the 
       ./Remote-PI-Logging/BOOTSTRAP.py <option> [hexfile]
 
 Acceptable options are
-  -h            help, will explain options
-  -R            Reset, will sent a reset comannd to the EDM 
-  -P [hexfile]  Will program the EDM with the presented hexfile. Hexfile is required for programming.
+  <-h>            help, will explain options
+  <-R>            Reset, will sent a reset comannd to the EDM 
+  <-P> [hexfile]  Will program the EDM with the presented hexfile. Hexfile is required for programming.

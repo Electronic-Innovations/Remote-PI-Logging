@@ -3,6 +3,16 @@ This repository contains the approprite python scripts to operate the the EDM's 
 
 For inforamtion regarding how to set up a fresh Rasperry Pi from a backup image (clean or used) please see the cloning instructions in the setup folder.
 
+**When running any programs that communicate with the EDM (loggingGit.py, BOOTSTRAP.py) ensure that minicom is closed** to check if a minicom terminal is open run the following command
+
+      ps aux | grep minicom
+
+If you recive more than one output line (ie one other than the one from the grep command) there is a minicom terminal open. It can be killed using the folowing command
+
+      sudo kill -9 <PID>
+
+Where the PID is the number in the coloumn following pi.
+
 ## Available Programs 
 There are currently 3 available programs to assist with logging data from the EDM, programming the EDM and cycling power to the EDM (if relays are connected)
 

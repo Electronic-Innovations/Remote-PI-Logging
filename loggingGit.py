@@ -11,9 +11,9 @@ from src.padding import PADDING
 # get the current date time
 now = datetime.datetime.now()
 d1 = now.strftime("%Y-%m-%d__%H_%M")
-filenametxt = '../data_backup/'+d1+'.txt'
-padfile = '../data_pad/' + d1 + 'pad.txt'
-datatext = '../datatext.txt'
+filenametxt = 'data_backup/'+d1+'.txt'
+padfile = 'data_pad/' + d1 + 'pad.txt'
+datatext = 'datatext.txt'
 
 #create object for reading data in from the serial port
 com = EDMSerial()

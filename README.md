@@ -8,8 +8,17 @@ There are currently 3 available programs to assist with logging data from the ED
 
 Before running any of the programs ensure that they are up to date by running the bash script in the home directory of the Pi
 
-  ./updatescripts.sh
+      ./updatescripts.sh
 
-This will update the scripts on the pi and ensure they are exacutable.
+This will update the scripts on the pi and ensure they are exacutable. All instructions will bas assuming you are running the programs from the home directory and as such running them from within the Remote-PI-Logging directory may effect functionality.
 
 ### BOOTSRTRAP.py
+
+This program is for re-programming the EDM from the RPi, it is called using the following structure
+
+      ./Remote-PI-Logging/BOOTSTRAP.py <option> [hexfile]
+
+Acceptable options are
+  -h            help, will explain options
+  -R            Reset, will sent a reset comannd to the EDM 
+  -P [hexfile]  Will program the EDM with the presented hexfile. Hexfile is required for programming.

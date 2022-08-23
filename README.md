@@ -23,7 +23,7 @@ This will open up the cron tab editor. The last line of this file is the section
 
       #0 * * * *  ./home/pi/Remote-PI-Logging/loggingGit.py  >> test.out
 
-By uncommenting this line and saving the file (**ctrl+x** then **y** then **enter**) the cronjob will run every hour. This frequency can change by adjusting the '0 * * * *' at the start of the line. More information about how to adjust these values can be found [here](https://crontab.guru). It should be noted that it does take time for the EDM to print all of its data. should there be any serial issues (partial reads) the program will wait for 15min on the serial port before procceding. Please take this into account.
+By uncommenting this line and saving the file (**ctrl+x** then **y** then **enter**) the cronjob will run every hour. The logging and output information and any error messages can be found in **test.out**. This frequency can change by adjusting the '0 * * * *' at the start of the line. More information about how to adjust these values can be found [here](https://crontab.guru). It should be noted that it does take time for the EDM to print all of its data. should there be any serial issues (partial reads) the program will wait for 15min on the serial port before procceding. Please take this into account.
 
 Ensure to disbale this functionality when using minicom for extened periods of time or when reprogramming the EDM. This can be done by editing the tab and commenting out the line.
 
@@ -47,14 +47,14 @@ This program is for re-programming the EDM from the RPi, it is called using the 
 
       ./Remote-PI-Logging/BOOTSTRAP.py <option> [hexfile]
 
-Acceptable options are
-  <-h>            help, will explain options
-  <-R>            Reset, will sent a reset comannd to the EDM 
+Acceptable options are: \n
+  <-h>            help, will explain options \n
+  <-R>            Reset, will send a reset comannd to the EDM \n
   <-P> [hexfile]  Will program the EDM with the presented hexfile. Hexfile is required for programming.
 
 ### CycleEDM.py
 
-This program will cycle the first Relay on the Relay hat. If this is connected to the EDM it cycle the EDM power. It should be called in the following manner 
+This program will cycle the first Relay on the Relay hat. If this is connected to the EDM it will cycle the EDM power. It should be called in the following manner 
 
       ./Remote-PI-Logging/CycleEDM.py
 

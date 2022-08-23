@@ -19,9 +19,9 @@ The RPi is set up for scheduled running of the loggingGit.py script (information
 
       conrtab -e 
 
-This will open up the cron tab editor. The last line of this file is the section for running the cronjob.
+This will open up the cron tab editor. The last line of this file is the section for running the cronjob it should look like this: _(this line may be incorrect in CLEAN installations)_.
 
-      #0 * * * *  ./home/pi/Remote-PI-Logging/loggingGit.py  >> test.out
+      #0 * * * *  ./Remote-PI-Logging/loggingGit.py  >> test.out
 
 By uncommenting this line and saving the file (**ctrl+x** then **y** then **enter**) the cronjob will run every hour. The logging and output information and any error messages can be found in **test.out**. This frequency can change by adjusting the '0 * * * *' at the start of the line. More information about how to adjust these values can be found [here](https://crontab.guru). It should be noted that it does take time for the EDM to print all of its data. should there be any serial issues (partial reads) the program will wait for 15min on the serial port before procceding. Please take this into account.
 

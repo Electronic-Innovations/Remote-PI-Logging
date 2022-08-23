@@ -18,7 +18,7 @@ datatext = '../../datatext.txt'
 #create object for reading data in from the serial port
 com = EDMSerial()
 #Port will need to be changed for RPi
-com.changePort('/dev/cu.usbserial-240')
+com.changePort('/dev/ttyUSB0')
 #Get data from EDM and save to file
 com.getEDMdata(filenametxt)
 

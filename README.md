@@ -32,7 +32,12 @@ Before running any of the programs ensure that they are up to date by running th
 
       ./updatescripts.sh
 
-This will update the scripts on the pi and ensure they are executable. All instructions will be assuming you are running the programs from the home directory and as such running them from within the Remote-PI-Logging directory may effect functionality.
+This file is also located in this git repository should it not be in the pi home directory run this command instead
+
+      chmod +x Remote-PI-Logging/updatescripts.sh
+      ./Remote-PI-Logging/updatescripts.sh      
+
+This will update the scripts on the pi and ensure they are executable. All instructions will be assuming you are running the programs from the home directory and as such running them from within the Remote-PI-Logging directory may effect functionality. 
 
 ### BOOTSRTRAP.py
 

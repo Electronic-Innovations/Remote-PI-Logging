@@ -13,6 +13,18 @@ If you recive more than one output line (ie one other than the one from the grep
 
 Where the PID is the number in the coloumn following pi.
 
+## Cronjob Logging
+
+The RPi is set up for schedualed running of the loggingGit.py script (information laid out below). This is done through the linux cron system, by defualt on a CLEAN image for the RPis this is disabled. To start automatic logging run the following command:
+
+      conrtab -e 
+
+This will open up the editor. The last line of this file is the section for running the cronjob.
+
+      #0 * * * *  ./home/pi/Remote-PI-Logging/loggingGit.py  >> test.out
+
+By uncommenting this line and saving the file (**ctrl+x** then **y** then **enetr**) the cronjob will run every hour. This frequency can change by adjusting the '0 * * * *' at the start of the line. More information about how to adjust these values can be found [here](https://crontab.guru). It should be noted that it does take time for the EDM to print all of its data. should there be any serial issues (partial reads) the program will wait for 15min on the serial port before procceding. Please take this into account. 
+
 ## Available Programs 
 There are currently 3 available programs to assist with logging data from the EDM, programming the EDM and cycling power to the EDM (if relays are connected)
 

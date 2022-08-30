@@ -7,6 +7,7 @@ import time
 import sys
 import getopt
 import os
+import subprocess
 send = ''
 hexfile =''
 reset = False
@@ -75,7 +76,8 @@ def do_command():
         com.write(send.encode())
         com.close()
         time.sleep(0.1)
-        os.system("msp430-bsl -evvv --erase=0x1100/2 --debug -S -p /dev/ttyUSB0 "+hexfile)
+        subprocess.call(["msp430-bsl","-evvv","--erase=0x1100/2","--debug","-S","-p","/dev/ttyUSB0",hexfile])
+        #os.system("msp430-bsl -evvv --erase=0x1100/2 --debug -S -p /dev/ttyUSB0 "+hexfile)
     except Exception, e1:
         print("error in comminucations \n" + str(e1))
 

@@ -15,12 +15,12 @@ days = 60
 #Get the amount of free space in the filesystem
 total, used, free = shutil.disk_usage('/home/pi/data_backup')
 freeGB = free/1024/1024/1024
-print(freeGB + " Gb of Free Space")
+print(str(freeGB) + " Gb of Free Space")
 #freeGB = 1
 print(datetime.datetime.strftime(datetime.datetime.now()))
 #if less than 2GB do a clean up
 if (freeGB<2):
-    print("Less than 2Gb removing files oflder than "+days+" days")
+    print("Less than 2Gb removing files oflder than "+str(days)+" days")
     #Aquire all the files in the data_backup directory
     #files = glob.glob("dummy/*.txt")
     files = glob.glob("/home/pi/data_backup/*.txt")

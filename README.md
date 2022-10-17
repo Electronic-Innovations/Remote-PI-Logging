@@ -28,7 +28,7 @@ By uncommenting this line and saving the file (**ctrl+x** then **y** then **ente
 Ensure to disbale this functionality when using minicom for extened periods of time or when reprogramming the EDM. This can be done by editing the tab and commenting out the line.
 
 ## Available Programs 
-There are currently 3 available programs to assist with logging data from the EDM, programming the EDM and cycling power to the EDM (if relays are connected)
+There are currently 4 available programs to assist with logging data from the EDM, programming the EDM and cycling power to the EDM (if relays are connected)
 
 Before running any of the programs ensure that they are up to date by running the bash script in the home directory of the Pi
 
@@ -61,6 +61,17 @@ This program will cycle the first Relay on the Relay hat. If this is connected t
 
       ./Remote-PI-Logging/CycleEDM.py
 
+### Cleanup.py
+
+This program removes older logged data from the **data_backup** and **data_pad** directories. It is to be setup in the form of a cronjob and will only removed files should the RPi have less than 2GB of storage remaining. This script can also be called manually by:
+
+    ./Remote-PI-Logging/Cleanup.py
+
+The cronjob for this task will need to be implemented on a case-by-case basis however a check once a day should be suffcient to ensure that that RPi does not fill up its storage in most cases. The following line will need to be added to the Cron tab for this cleanup function to work.
+
+          30 12 * * *  ./Remote-PI-Logging/Cleanup.py  >> removed.out
+
+This will perform a check at 12:30pm everyday to ensure the memory has more than 2Gb of space. See the Cronjob logging section for more information about the crontab 
 ### loggingGit.py
 
 This is the automated logging script. It has several section each have been separated into several subs scripts which are called from this main program.

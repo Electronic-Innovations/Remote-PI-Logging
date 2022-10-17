@@ -17,7 +17,7 @@ total, used, free = shutil.disk_usage('/home/pi/data_backup')
 freeGB = free/1024/1024/1024
 print(str(freeGB) + " Gb of Free Space")
 #freeGB = 1
-print(datetime.datetime.strftime(datetime.datetime.now()))
+print((datetime.datetime.now()).datetime.datetime.strftime("%Y-%m-%d__%H_%M"))
 #if less than 2GB do a clean up
 if (freeGB<2):
     print("Less than 2Gb removing files oflder than "+str(days)+" days")

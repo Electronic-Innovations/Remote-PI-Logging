@@ -12,12 +12,12 @@ import os
 # remove data older than
 days = 60
 
+print((datetime.datetime.now()).strftime("%Y-%m-%d__%H_%M"))
 #Get the amount of free space in the filesystem
 total, used, free = shutil.disk_usage('/home/pi/data_backup')
 freeGB = free/1024/1024/1024
 print(str(freeGB) + " Gb of Free Space")
 #freeGB = 1
-print((datetime.datetime.now()).strftime("%Y-%m-%d__%H_%M"))
 #if less than 2GB do a clean up
 if (freeGB<2):
     print("Less than 2Gb removing files oflder than "+str(days)+" days")

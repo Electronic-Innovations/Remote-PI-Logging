@@ -15,7 +15,7 @@ days = 60
 #Get the amount of free space in the filesystem
 total, used, free = shutil.disk_usage('/home/pi/data_backup')
 freeGB = free/1024/1024/1024
-print(freeGB = "Gb of Free Space")
+print(freeGB + " Gb of Free Space")
 #freeGB = 1
 print(datetime.datetime.strftime(datetime.datetime.now()))
 #if less than 2GB do a clean up

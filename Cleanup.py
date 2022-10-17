@@ -21,7 +21,7 @@ if (freeGB<2):
     for file in files:
         date_string = file.replace('.txt','')
         #date_string = date_string.replace('dummy/','')
-        date_string = date_string.replace('/home/pi/data_backup','')
+        date_string = date_string.replace('/home/pi/data_backup/','')
         file_date = datetime.datetime.strptime(date_string,'%Y-%m-%d__%H_%M')
         difference = now - file_date
         if(difference> datetime.timedelta(days = days)):
@@ -35,7 +35,7 @@ if (freeGB<2):
     for file2 in files2:
         date_string = file2.replace('pad.txt','')
         #date_string = date_string.replace('dummy/','')
-        date_string = date_string.replace('/home/pi/data_pad','')
+        date_string = date_string.replace('/home/pi/data_pad/','')
         file_date = datetime.datetime.strptime(date_string,'%Y-%m-%d__%H_%M')
         difference = now - file_date
         if(difference> datetime.timedelta(days = days)):

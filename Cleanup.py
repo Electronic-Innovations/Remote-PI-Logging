@@ -57,5 +57,5 @@ if (freeGB<2):
             else:    ## Show an error ##
                 print("Error: file not found" + file2)
 else:
-print("Over 2Gb of space remaning not removing files")
+    print("Over 2Gb of space remaning not removing files")
     

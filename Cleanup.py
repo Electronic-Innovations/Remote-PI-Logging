@@ -17,7 +17,7 @@ freeGB = free/1024/1024/1024
 #freeGB = 1
 print(str(freeGB) + " Gb of Free Space")
 #if less than 2GB do a clean up
-if (freeGB<7.321):
+if (freeGB<2):
     print("Less than 2Gb removing files to ensure 2Gb of space")
     #Aquire all the files in the data_backup and data_pad directory and sort they alphabetically
     #files = sorted(glob.glob("dummy/*.txt"))
@@ -26,7 +26,7 @@ if (freeGB<7.321):
     files2 = sorted(glob.glob("/home/pi/data_pad/*.txt"))
     #Get current time
     now = datetime.datetime.now()
-    # Loop over each file and strip path and .txt, check the filename for datetime of creation
+    # Loop over each file and removed one at a time checking storage space each time
     if len(files)>= len(files2):
         num = len(files)
     else:
@@ -39,9 +39,10 @@ if (freeGB<7.321):
             #freeGB = freeGB +0.5
         else:    ## Show an error ##
             print("Error: file not found:" + files[i])
+        #Check freed space
         total, used, free = shutil.disk_usage('/home/pi/data_backup')
         freeGB = free/1024/1024/1024
-        if freeGB>7.321:
+        if freeGB>2:
             break
         
         # remove oldest padfile
@@ -53,7 +54,7 @@ if (freeGB<7.321):
             print("Error: file not found:" + files2[i])
         total, used, free = shutil.disk_usage('/home/pi/data_backup')
         freeGB = free/1024/1024/1024
-        if freeGB>7.321:
+        if freeGB>2:
             break
 quit()
 

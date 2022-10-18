@@ -63,7 +63,7 @@ This program will cycle the first Relay on the Relay hat. If this is connected t
 
 ### Cleanup.py
 
-This program removes older logged data from the **data_backup** and **data_pad** directories. It is to be setup in the form of a cronjob and will only removed files should the RPi have less than 2GB of storage remaining. This script can also be called manually by:
+This program removes older logged data from the **data_backup** and **data_pad** directories. It is to be setup in the form of a cronjob and will only removed files should the RPi have less than 2GB of storage remaining. It will removed the oldest logfiles indicated by the filename progresively untill 2GB of space is freed. This script can also be called manually by:
 
     ./Remote-PI-Logging/Cleanup.py
 
@@ -71,7 +71,8 @@ The cronjob for this task will need to be implemented on a case-by-case basis ho
 
           30 12 * * *  ./Remote-PI-Logging/Cleanup.py  >> removed.out
 
-This will perform a check at 12:30pm everyday to ensure the memory has more than 2Gb of space. See the Cronjob logging section for more information about the crontab 
+This will perform a check at 12:30pm everyday to ensure the memory has more than 2Gb of space. See the Cronjob logging section for more information about the crontab.
+
 ### loggingGit.py
 
 This is the automated logging script. It has several section each have been separated into several subs scripts which are called from this main program.

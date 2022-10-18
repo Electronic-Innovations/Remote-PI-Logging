@@ -22,8 +22,8 @@ if (freeGB<7.321):
     #Aquire all the files in the data_backup and data_pad directory and sort they alphabetically
     #files = sorted(glob.glob("dummy/*.txt"))
     #files2 = sorted(glob.glob("dummypad/*.txt"))
-    files = glob.glob("/home/pi/data_backup/*.txt")
-    files2 = glob.glob("/home/pi/data_pad/*.txt")
+    files = sorted(glob.glob("/home/pi/data_backup/*.txt"))
+    files2 = sorted(glob.glob("/home/pi/data_pad/*.txt"))
     #Get current time
     now = datetime.datetime.now()
     # Loop over each file and strip path and .txt, check the filename for datetime of creation

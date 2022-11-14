@@ -13,6 +13,12 @@ If you recive more than one output line (ie one other than the one from the grep
 
 Where the PID is the number in the coloumn following pi.
 
+Most RPIs will be equiped with a cron job that will automatically kill any minicom terminal on the 55th minute of the hour.
+
+      55 * * * * pkill minicom
+      
+For more information about cronjobs see the following section.
+
 ## Cronjob Logging
 
 The RPi is set up for scheduled running of the loggingGit.py script (information laid out below). This is done through the linux cron system, by defualt on a CLEAN image for the RPis this is disabled. To start automatic logging run the following command:
@@ -91,7 +97,25 @@ The following section filters through the raw data to assertain the time in seco
 #### Appending to a Continous data set.
 The final section of the program appeneds the newly recieved data to a .txt file to produce a continous data set. This is done by searching for the the last timesatmp in the continous set to see if it is present in the new data form the padded file. If so it is appened directly to the large dataset from the following timestamp. Should the timestamp not be found the diffrence between the closest time and the last time is assesed and if it is less that 24hrs the data will be padded with 0s and appeneded. If the time is greater that 24hrs it will be separated by a number of #s and added as a new section. This large data file is called **datatext.txt**.
 
+
+# Graphing and Data Processing
+A python based graphing and processing utility has been added which utilises Pandas, Numpy and Matplotlib. These packages will need to be installed on any device which wishes to utilise this module. It is not advised to use the RPIs for this process and it should be completed on an office computer or laptop. This module also allows the user to convert the text files of data to compressed csv files, join several text files together and complete basic data scaling. The main module of this utility can be found at **graph_src/Graph.py** and contains detailed descriptions of how the module operates and available functions. A test script showing the usage in python of this module can be found at **graph_src/example.py**.
+
+To use this module for an explicit data set ensure that Pandas, Numpy and Matplotlib are installed by running the following commands:
+
+      pip3 install pandas
+      
+      pip3 install numpy
+      
+      pip3 install matplotlib
+
+This can be done in the standard or a virtual environment. Copy **Graph.py** and **example.py** to the same directory as your datafile/s Then either write your own .py script or modify **example.py** to suit your needs. To run the script navigate to the directory of the script in a terminal and run:
+
+      python3 your_script.py
+      
 ### TO DO
+
+Reassess the badding functionality of loggingGit.py as the graphing utility does not require it and it may be redundant.
 
 File containing only timestamped data (Ross)
 

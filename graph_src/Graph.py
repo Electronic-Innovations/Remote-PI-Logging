@@ -409,7 +409,7 @@ class Graphing:
 
     # Method for plotting all data with construced date time stamps
     def mkGraph_add(self, specific =None, start_time = None):
-        
+        plt.figure()
         plot_data = self.pdData.set_index('Time')                       # Create temp data frame and set index to contructed date time stamps
         plot_data = plot_data.drop(columns='Time_r')                    # Drop real date time stamps from the set
         
@@ -466,6 +466,7 @@ class Graphing:
         
     # Method for plotting only EDM timestamped data
     def mkGraph_true(self, specific = None, start_time = None):
+        plt.figure()
         plot_data = self.pdData                                         # Create temp dataframe
         plot_data = plot_data.drop(columns='Time')                      # Drop crontructed date time column 
         plot_data = plot_data[plot_data.Time_r.notnull()]               # remove rows with null date time stamps
@@ -655,6 +656,7 @@ class Graphing:
     # Useful for a visual assesment, corosponding bins and counts are printed to the terminal
     # Only works on datasets converted from a data file not a csv
     def Histogram_data(self):
+        plt.figure()
         print(np.histogram_bin_edges(self.histogram_arr_depth[1:],bins = list(range(max(self.histogram_arr_depth)+3))))
         counts_w, bins_w = np.histogram(self.histogram_arr_width, bins = list(range(max(self.histogram_arr_width)+3)))          # histogram width of data (column number consistency)
         plt.bar(bins_w[:-1], height=counts_w)     # plot histogram

@@ -233,12 +233,23 @@ This program has been developed to read in an EDM datafile (.txt extention or .d
             Dependencies:
                 Graphing()
                     mkdata()
+
+
+        collect_files(directory = "", extension = ".txt")
+
+            Method used to collect all the files in a give directory with a given extention. this list can be provided to join_data_text()
+            it y default searches the current directory and for .txt files.
+
+            Inputs
+                directory - the directory to search (relative or root path)
+                extension - the file extension to search for (defaults to .txt)
                         
     
     
 '''
 
-
+import glob
+import string
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -251,7 +262,6 @@ class Graphing:
     def __init__(self,filename, hexflag = False):
         self.filename=filename
         self.dataframe = []
-        self.time_step = time_step
         self.pdData = None
         self.hexflag = hexflag
         self.convert_flag = False
@@ -276,6 +286,7 @@ class Graphing:
                 count = 0
                 temp = self.pdData.loc[i,'Time']
                 count +=self.time_step
+            
 
     # Method to adaptively fill the 'Time' coloumn with timestamps. Uses the surrounding timestamps
     # and number of data points between them to determine the timezone of the data and label it
@@ -310,7 +321,8 @@ class Graphing:
             if k == 0: continue
             self.pdData.loc[idx[-1]+k,'Time'] = self.pdData.loc[idx[-1]+k-1,'Time'] + timedelt          # After looping use last timedelt to label the last page of data
         #print(self.pdData.loc[:,'Time'].to_string())
-
+        #print(self.pdData.to_string())
+        
     # Method that creates a pandas dataframe from a text file.        
     def mkdata(self):
 
@@ -327,17 +339,19 @@ class Graphing:
 
             #Cycle through each line of file
             for line in lines:
+                line = ''.join([x for x in line if x in string.printable])
                 if line.find('%') !=-1:         # If has a % set start flag
                     started =True               #   (first line should be a comment or have a timestamp with %)
                 if started ==True:
                     linedata = line.split()
 
                     #Split line on whitespace and check if first elemet for (nothing, empty '', comment or split)
-                    if not linedata or linedata[0] == '' or linedata[0] == '%' or linedata[0] == '%%%' or linedata[0] == 'ok' or linedata[0] =='SSPRD_ALL':
+                    if not linedata or linedata[0] == '' or linedata[0] == '%' or linedata[0] == '%%%' or linedata[0] == 'ok' or linedata[0] =='SSPRD_ALL' or linedata[0] =='..' or linedata[0] =='<sp' or linedata[0] =='d':
                         continue                # skip to next line if so
 
                     # Cycle each part of the line
                     for i in range(len(linedata)):
+                        linedata[i] = linedata[i].replace('/x11','')
                         if linedata[i] == '%':  # Single % indicates timestamp
                             time = True         # Set flag, mark index and set timedata string move to next item
                             pos = i
@@ -386,6 +400,7 @@ class Graphing:
         self.pdData.rename(columns={(self.pdData.shape[1]-2):'Time_r'}, inplace = True)                                             # rename real stamp coloumn 'Time_r'
         self.pdData["Time_r"] = self.pdData["Time"]                                                                                 # Create new coloumn to be filled with created date time stamps
         self.columnNames = list(self.pdData.columns.values)                                                                         # Save the column names to the object for access later
+        self.dataframe = []
         print(self.pdData)                                                                                                          # print dataframe to terminal
 
     # Method to name the data channels of the dataframe
@@ -409,8 +424,9 @@ class Graphing:
 
     # Method for plotting all data with construced date time stamps
     def mkGraph_add(self, specific =None, start_time = None):
-        plt.figure()
-        plot_data = self.pdData.set_index('Time')                       # Create temp data frame and set index to contructed date time stamps
+        #plt.figure()
+        plot_data = self.pdData.sort_values(['Time'])
+        plot_data = plot_data.set_index('Time')                       # Create temp data frame and set index to contructed date time stamps
         plot_data = plot_data.drop(columns='Time_r')                    # Drop real date time stamps from the set
         
         if start_time is not None:                                      # Check for ttime to start plotting
@@ -439,8 +455,8 @@ class Graphing:
         
     # Method for plotting each data channel individually (all data)
     def mkGraph_all_add(self, start_time = None):
-        
-        plot_data = self.pdData.set_index('Time')                       # Create temp data frame and set index to contructed date time stamps
+        plot_data = self.pdData.sort_values(['Time'])
+        plot_data = plot_data.set_index('Time')                       # Create temp data frame and set index to contructed date time stamps
         plot_data = plot_data.drop(columns='Time_r')                    # Drop real date time stamps from the set
 
         if start_time is not None:                                      # Check for ttime to start plotting
@@ -466,15 +482,15 @@ class Graphing:
         
     # Method for plotting only EDM timestamped data
     def mkGraph_true(self, specific = None, start_time = None):
-        plt.figure()
+        #plt.figure()
         plot_data = self.pdData                                         # Create temp dataframe
         plot_data = plot_data.drop(columns='Time')                      # Drop crontructed date time column 
         plot_data = plot_data[plot_data.Time_r.notnull()]               # remove rows with null date time stamps
+        plot_data = plot_data.sort_values(['Time_r'])
         plot_data = plot_data.set_index('Time_r')                       # set index as date time stamps
         if start_time is not None:                                      # Check for ttime to start plotting
             times = plot_data.index.tolist()
             start = min(dt for dt in times if dt > (datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')))            # find earliest time after the input time
-            
             plot_data = plot_data.loc[start:]                           # Adjust the plotting dataframe
             
         plot_data = plot_data.astype(str)                               # convert data to string tyoe type
@@ -498,6 +514,7 @@ class Graphing:
         plot_data = self.pdData                                         # Create temp dataframe
         plot_data = plot_data.drop(columns='Time')                      # Drop crontructed date time column 
         plot_data = plot_data[plot_data.Time_r.notnull()]               # remove rows with null date time stamps
+        plot_data = plot_data.sort_values(['Time_r'])
         plot_data = plot_data.set_index('Time_r')                       # set index as date time stamps
 
         if start_time is not None:                                      # Check for ttime to start plotting
@@ -542,16 +559,15 @@ class Graphing:
         
     # Method for saving data fram as a compressed CSV file
     def save_compress(self,flag):
-        name = self.filename.strip('.txt')                              # Strip file extentions from filenames (currently not working)
-        name = self.filename.strip('.csv.zip')
-        name = self.filename.strip('.csv.gz')
+        name = self.filename.split('.')                                                         # Strip file extensions 
+        name = name[0]
         #print(self.pdData.to_string())
         self.pdData[self.columnNames[:-2]] = self.pdData[self.columnNames[:-2]].astype(str)     # Convert data to integer type
         if self.hexflag:
             for i in range(self.pdData.shape[1]-2):
                 self.pdData[self.columnNames[i]] =self.pdData[self.columnNames[i]].apply(int,base=16)
         else:
-            self.pdData = self.pdData.astype(float)
+            self.pdData[self.columnNames[:-2]] = self.pdData[self.columnNames[:-2]].astype(float)
         if flag == "zip":
             self.pdData.to_csv(name+'New.csv.zip',index =False, compression = "zip")                        # If flag is 'zip' use zip compression  
         elif flag == "gzip":
@@ -572,22 +588,25 @@ class Graphing:
 
         if self.pdData is not None:                                                         # check if a data frame aleardy exists
             self.pdBigData = self.pdData                                                    # set current dataframe to placeholder
+            self.pdData = None
             for name in filelist:
                 self.filename = name                                                        # loop over files, mkdata() and appened to placholder
+                self.pdData = None
                 self.mkdata()
-                self.pdBigData = self.pdBigData.append(self.pdData, ignore_index = True)    
-            print(self.pdBigData)
+                self.pdBigData = pd.concat([self.pdBigData,self.pdData], ignore_index = True)   
             self.filename = outfilename                                                     # save outfilename
             self.pdData = self.pdBigData                                                    # set placholder back to normal dataframe for other methods.
         else:
             self.filename = filelist[0]                                                     # make inital dataframe from first file
             self.mkdata()
             self.pdBigData= self.pdData
+            self.pdData = None
             for name in filelist:
                 if name == self.filename: continue                                          # Loop over names and append data frames togeteher
                 self.filename = name
                 self.mkdata()
-                self.pdBigData = self.pdBigData.append(self.pdData, ignore_index = True)
+                self.pdBigData = pd.concat([self.pdBigData,self.pdData], ignore_index = True)
+                self.pdData = None
             print(self.pdBigData)
             self.filename = outfilename                                                     # set outfile name and set placeholder as the objects main dataframe 
             self.pdData = self.pdBigData
@@ -670,6 +689,9 @@ class Graphing:
         print(counts_d)
         pass
 
+    # Method for collecting all the filenames with a given extension and path to directory useful for the join method.
+    def collect_files(self,extension = ".txt",directory = ""):
+        return sorted(glob.glob(directory+'*'+extension))
 
         
 # Main area testing and funtions.

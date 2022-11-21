@@ -13,10 +13,10 @@ if __name__ == "__main__":
     
     filename = "Placholder.txt"
     #Channel_names
-    channel_names = ["Rwatts","RVA","Swatts","SVA","Twatts","rI","sI","tI","rV","sV","tV"]
+    #channel_names = ["Rwatts","RVA","Swatts","SVA","Twatts","rI","sI","tI","rV","sV","tV"]
 
     #Create Object
-    #obj = Graphing(filename, hexfile = False)
+    #obj = Graphing(filename, hexflag = False)
 
     #Make the dataframe and histogram info
     #obj.mkdata()
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     #obj.mkGraph_all_true(start_time = None)
     
     #ploting all rows of data reqires
-    #obj.ext_time.d()
+    #obj.ext_time_d()
 
     #Plotting for all rows functions have tha same syntax
     #obj.mkGraph_add(specific = None,start_time = None)
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     #channel_names = ["Rwatts","RVA","Swatts","SVA","Twatts","rI","sI","tI","rV","sV","tV"]
 
     #Create Object
-    #obj = Graphing(filename, hexfile = False)
+    #obj = Graphing(filename, hexflag = False)
 
     #Make the dataframe and histogram info
     #obj.mkdata()
@@ -87,21 +87,48 @@ if __name__ == "__main__":
     #To process several files into one dataframe. Data must have the same column width
 
     # List of file names
-    #filelist = ["file1","file2","file3"]
-    
+    #filelist = ["fiel1, file 2"]
+    # Or generate from directory
+    #filelist = obj.collect_files(directory = "path", extension = ".txt/.dta")
+
     #Channel_names
     #channel_names = ["Rwatts","RVA","Swatts","SVA","Twatts","rI","sI","tI","rV","sV","tV"]
 
     # Create Object
-    #obj = Graphing("", hexfile = False)
+    #obj = Graphing("TD_SA/2022-06-28_14-25.txt", hexflag = False)
 
     # Replacement mkdata
-    #test.join_data_text(filelist, "newfilename")
-
+    #obj.join_data_text(filelist, "outfilename")
+    
     # steps can now be followed as if its a single file. Note that the histogram option may be
     # inacurate as the mkdata() function is called several times in the join_data_text() function.
 
 
+    #######################################
+    #Assorted testing
+
+
+
+        # List of file names
+    #filelist = ["file1","file2"]
+
+    #Channel_names
+    #channel_names = ["Rwatts","RVA","Swatts","SVA","Twatts","rI","sI","tI","rV","sV","tV"]
+
+    # Create Object
+    obj = Graphing("TD_SA/2022-06-28_14-25.txt", hexflag = False)
+    filelist = obj.collect_files(directory = "TD_SA/")
+    #obj.mkdata()
+    
+    #obj.Histogram_data()
+    #obj.open_csv("TD_SA/SA_TEST.txtNew.csv.zip")
+    # Replacement mkdata
+    obj.join_data_text(filelist, "TD_SA/SA_TEST.txt")
+
+    #obj.mkGraph_true(specific = None,start_time = None)
+    obj.ext_time_d()
+    #obj.mkGraph_add(specific = None,start_time = None)
+    obj.save_compress("zip")
     
     # function that shows the plots. Must be called after they are created
     plt.show()

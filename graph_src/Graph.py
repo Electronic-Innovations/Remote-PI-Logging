@@ -29,15 +29,21 @@ This program has been developed to read in an EDM datafile (.txt extention or .d
                 hexflag - a True/False flag to let the program know if the data is in hexadecimal
             
     
-         mkdata()
+         mkdata(width = None, width_t = None )
 
              Method which uses the filename in the constructed class to search the current directory for the file
-             then brings it into the program as a pandas dataframe.
+             then brings it into the program as a pandas dataframe. Input variables are used following a histogram of the data.
+             Using these variables will select the width of the data and should be found as the bins with largest two counts
+             from the histogram functions. width_t = width +1 as per how mkdata runs.
 
              Features:
                  Reads each line indifidually and breaks them up on whitespace. Searches for '%' to mark date stamps
                  Records the number of columns in reach row
                  Records the number of rows between timestamps
+
+            Inputs:
+                width - the bin with the largest count from histogram_data()
+                width_t - the bin with the second largest count form histogram_data() (width_t = width + 1)
 
             Dependencies:
                 Graphing()
@@ -324,7 +330,7 @@ class Graphing:
         #print(self.pdData.to_string())
         
     # Method that creates a pandas dataframe from a text file.        
-    def mkdata(self):
+    def mkdata(self, width = None, width_t = None):
 
         #Open file
         with open(self.filename,'r') as datafile:
@@ -339,7 +345,10 @@ class Graphing:
 
             #Cycle through each line of file
             for line in lines:
-                line = ''.join([x for x in line if x in string.printable])
+                line = ''.join([x for x in line if x in string.printable])  # check for non-printable charachters and remove them
+                
+                if line.upper().isupper() and self.hexflag == False and (line.find('ok') == -1):      #If the line contains any letters (non-hex data) and skip if so    
+                    continue
                 if line.find('%') !=-1:         # If has a % set start flag
                     started =True               #   (first line should be a comment or have a timestamp with %)
                 if started ==True:
@@ -386,13 +395,22 @@ class Graphing:
                     #print(vect)
                     #if(len(vect)> 10):
                         #raise Exception("stop")
-
-                    
-                    self.dataframe.append(vect) # append vect to a list of lists to make a dataframe
-                    time =False                 # reset flags
+                    if width is not None:
+                        if len(vect) == width or len(vect) == width_t:
+                            
+                            self.dataframe.append(vect)     # append vect to a list of lists to make a dataframe
+                            
+                        else:
+                            pass                            # if width is defined but does not match do not include
+                    else:
+                        self.dataframe.append(vect)     # append vect to a list of lists to make a dataframe
+                       
+                        
+                    time =False                         # reset flags
                     comment = False
-                    vect = []                   # empty variables
+                    vect = []                           # empty variables
                     timedata =[]
+                    
         
         self.pdData = pd.DataFrame(self.dataframe)                                                                                  # Create dataframe from list of lists
         temp = self.pdData.shape                                                                                                    # get axis length
@@ -614,17 +632,20 @@ class Graphing:
     
     def Convert_channel(self,channel, scale_factor):
         self.convert_flag = True
-        avg = self.pdData[channel].mean()
-        factor = avg/scale_factor
-        self.pdData[channel] = self.pdData[channel]/factor
-        print(factor)
+        #avg = self.pdData[channel].mean()
+        #factor = avg/scale_factor
+        self.pdData[channel] = (self.pdData[channel].astype(float))*scale_factor
+        #print(factor)
 
-    def Subplot_data(self,columns, method = 'Time_real', fontsize = 18, yaxis = 'yaxis', xaxis = 'Date and Time'):
+    def Subplot_data(self,columns, method = 'Time_real', fontsize = 18, yaxis = 'yaxis', xaxis = 'Date and Time', ylabels = None):
         plt.rcParams.update({'font.size': fontsize})
         f, axes = plt.subplots(len(columns),1, sharex = True, figsize = (20,10))
 
+        if ylabels == None:
+            ylabels = columns   
+
         if method == 'Time_real':                                           # If using only timestamped sections
-            plot_data = plot_data.drop(columns='Time')                      # Drop crontructed date time column 
+            plot_data = self.pdData.drop(columns='Time')                      # Drop crontructed date time column 
             plot_data = plot_data[plot_data.Time_r.notnull()]               # remove rows with null date time stamps
             plot_data = plot_data.set_index('Time_r')                       # set index as date time stamps
             
@@ -650,7 +671,8 @@ class Graphing:
         print(plot_data)                                                # print data frame to be plotted
 
         for k in range(len(columns)):
-            plot_data[columns[k]].plot(ax = axes[k], style = "-o", markersize= 1, linewidth = 0.5, ylabel = columns[k])
+            plot_data[columns[k]].plot(ax = axes[k], style = "-o", markersize= 1, linewidth = 0.5, ylabel = ylabels[k])
+            axes[k].legend(loc = 'upper right')
             
         plt.xlabel("")
         f.supylabel(yaxis)                                              # apply labels 
@@ -693,6 +715,21 @@ class Graphing:
     def collect_files(self,extension = ".txt",directory = ""):
         return sorted(glob.glob(directory+'*'+extension))
 
+    def single_plot_2y(self,axis1, axis2,method = 'Time_real', start_time = None):
+        
+        if method == 'Time_real':                                           # If using only timestamped sections
+            plot_data = self.pdData.drop(columns='Time')                      # Drop crontructed date time column 
+            plot_data = plot_data[plot_data.Time_r.notnull()]               # remove rows with null date time stamps
+            plot_data = plot_data.set_index('Time_r')                       # set index as date time stamps
+            
+        elif method == 'Time_all':
+            plot_data = self.pdData.set_index('Time')                       # Create temp data frame and set index to contructed date time stamps
+            plot_data = plot_data.drop(columns='Time_r')                    # Drop real date time stamps from the set
+
+        else:                                                               # handle error in method
+            print("Unavailable method, Options are:")
+            print("'Time_real'\t to plot with EDM time stamps\n'Time_all'\t to plot with added time stamps and all data")
+            return
         
 # Main area testing and funtions.
 if __name__ == "__main__":

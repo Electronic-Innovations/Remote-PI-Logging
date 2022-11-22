@@ -24,6 +24,10 @@ if __name__ == "__main__":
     #Create the histogram fig 
     #obj.Histogram_data()
 
+    #If there are more than the expected number of recorded data widths re-run mkdata()
+    #using the width and width_t variables
+    #obj.mkdata(width = highest count bin, width_t = second hights count bin)
+
     #histogram showed large number of sections with fewer channels therfore run
     #obj.Remove_None()
 
@@ -113,22 +117,32 @@ if __name__ == "__main__":
     #filelist = ["file1","file2"]
 
     #Channel_names
-    #channel_names = ["Rwatts","RVA","Swatts","SVA","Twatts","rI","sI","tI","rV","sV","tV"]
+    channel_names = ["DC-v","Sph-V","Rph-V","Rph-I","Sph-I","DCv-Min","SphV-Min","RphV-Min","RphI-Min","SphI-Min","DCv-MAX", "SphV-MAX","RphV-MAX","RphI-MAX","SphI-MAX"]
 
     # Create Object
-    obj = Graphing("TD_SA/2022-06-28_14-25.txt", hexflag = False)
-    filelist = obj.collect_files(directory = "TD_SA/")
+    obj = Graphing("TD_SA/2022-11-22__05_00.txt", hexflag = False)
+    filelist = obj.collect_files(directory = "TD_SA/2022-11")
     #obj.mkdata()
     
     #obj.Histogram_data()
-    #obj.open_csv("TD_SA/SA_TEST.txtNew.csv.zip")
+    #obj.open_csv("TD_SA/SA_TESTNew.csv.zip")
     # Replacement mkdata
     obj.join_data_text(filelist, "TD_SA/SA_TEST.txt")
-
-    #obj.mkGraph_true(specific = None,start_time = None)
+    #obj.Histogram_data()
+    obj.name_channel(channel_names)
+    # Converting voltages
+    scale= (2440/97310)
+    obj.Convert_channel(["DCv-Min","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],scale)
+    temp =2322.3006944444446
+    factor = 65/temp
+    obj.Convert_channel(["Rph-I","Sph-I","RphI-Min","SphI-Min","RphI-MAX","SphI-MAX"],factor)
+    #obj.mkGraph_true(specific = ["DCv-Min","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX","SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"],start_time = None)
     obj.ext_time_d()
-    #obj.mkGraph_add(specific = None,start_time = None)
-    obj.save_compress("zip")
-    
+    #obj.mkGraph_add(specific = ["Rph-I"])
+    #obj.mkGraph_add(specific = ["DCv-Min","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX","SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"],start_time = None)
+    obj.Subplot_data([["DCv-Min","DCv-MAX"],["SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]],method = 'Time_all', ylabels = ["Volts (V)", "Volts (V)","Current (A)"], yaxis = '', xaxis = '2022-11-21 (AEST)')
+    #obj.save_compress("zip")
+
     # function that shows the plots. Must be called after they are created
+    plt.legend(loc='upper right')
     plt.show()

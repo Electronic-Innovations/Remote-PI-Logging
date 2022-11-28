@@ -611,7 +611,7 @@ class Graphing:
             for i in range(self.pdData.shape[1]-2):
                 self.pdData[self.columnNames[i]] =self.pdData[self.columnNames[i]].apply(int,base=16)
         else:
-            self.pdData[self.columnNames[:-2]] = self.pdData[self.columnNames[:-2]].astype(float)
+            self.pdData[self.columnNames[:-2]] = self.pdData[self.columnNames[:-2]].astype(np.float32)
         if flag == "zip":
             self.pdData.to_csv(name+'New.csv.zip',index =False, compression = "zip")                        # If flag is 'zip' use zip compression  
         elif flag == "gzip":

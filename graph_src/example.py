@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
     # Create Object
     obj = Graphing("TD_SA/2022-11-22__05_00.txt", hexflag = False)
-    filelist = obj.collect_files(directory = "TD_SA/2022-11")
+    #filelist = obj.collect_files(directory = "TD_SA/2022-11")
     #obj.mkdata()
     
     #obj.Histogram_data()
@@ -138,10 +138,10 @@ if __name__ == "__main__":
     obj.name_channel(channel_names)
     # Converting voltages
     scale= (2440/97310)
-    #obj.Convert_channel(["DCv-Min","DC-v","Sph-V","Rph-V","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],scale)
+    obj.Convert_channel(["DCv-Min","DC-v","Sph-V","Rph-V","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],scale)
     temp =2322.3006944444446
     factor = 65/temp
-    #obj.Convert_channel(["Rph-I","Sph-I","RphI-Min","SphI-Min","RphI-MAX","SphI-MAX"],factor)
+    obj.Convert_channel(["Rph-I","Sph-I","RphI-Min","SphI-Min","RphI-MAX","SphI-MAX"],factor)
     #obj.mkGraph_true(specific = ["DCv-Min","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX","SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"],start_time = None)
     #obj.mkGraph_true()
     #obj.ext_time_d()

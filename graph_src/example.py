@@ -25,7 +25,7 @@ if __name__ == "__main__":
     #obj.Histogram_data()
 
     #If there are more than the expected number of recorded data widths re-run mkdata()
-    #using the width and width_t variables
+    #   using the width and width_t variables
     #obj.mkdata(width = highest count bin, width_t = second hights count bin)
 
     #histogram showed large number of sections with fewer channels therfore run
@@ -59,6 +59,11 @@ if __name__ == "__main__":
     # plot a subplot of rV sV and tV using all rows with fontsize 18 anf labelled major axis 
     #obj.Subplot_data(["rV","sV","tV"], method ='Time_all', fontsize = 18 ,yaxis = 'Voltage',xaxis = 'Date and Time')
 
+    # If a single plot with 2 y-axis are required
+    # plot a single plot with DCv-Min and DCv-MAX on the left axis in red and blue. And plot SphI-Min, SphI-MAX, RphI-Min and RphI-MAX on the right yaxis in green, magenta, yellow and cyan
+    # using all the data points. Look in Graph.py for more options for labelling
+    #obj.single_plot_2y(["DCv-Min","DCv-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"],["r","b","g","m","y","c"],method = "Time_all")
+
     # To save the dataframe to compressed csv using 'zip' compression
     #obj.save_compress("zip")
 
@@ -70,6 +75,7 @@ if __name__ == "__main__":
     #filename = "Place Holder Zip file name"
     #obj = Graphing("")
     #obj.open_csv(filename)
+    
     # Assuming all processing has been done can be plotted as above
 
     ################################
@@ -125,24 +131,26 @@ if __name__ == "__main__":
     #obj.mkdata()
     
     #obj.Histogram_data()
-    #obj.open_csv("TD_SA/SA_TESTNew.csv.zip")
+    obj.open_csv("TD_SA/SA_NovNew.csv.zip")
     # Replacement mkdata
-    obj.join_data_text(filelist, "TD_SA/SA_TEST.txt")
+    #obj.join_data_text(filelist, "TD_SA/SA_Nov.txt")
     #obj.Histogram_data()
     obj.name_channel(channel_names)
     # Converting voltages
     scale= (2440/97310)
-    obj.Convert_channel(["DCv-Min","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],scale)
+    #obj.Convert_channel(["DCv-Min","DC-v","Sph-V","Rph-V","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],scale)
     temp =2322.3006944444446
     factor = 65/temp
-    obj.Convert_channel(["Rph-I","Sph-I","RphI-Min","SphI-Min","RphI-MAX","SphI-MAX"],factor)
+    #obj.Convert_channel(["Rph-I","Sph-I","RphI-Min","SphI-Min","RphI-MAX","SphI-MAX"],factor)
     #obj.mkGraph_true(specific = ["DCv-Min","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX","SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"],start_time = None)
-    obj.ext_time_d()
+    #obj.mkGraph_true()
+    #obj.ext_time_d()
+    #obj.mkGraph_add()
     #obj.mkGraph_add(specific = ["Rph-I"])
     #obj.mkGraph_add(specific = ["DCv-Min","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX","SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"],start_time = None)
     obj.Subplot_data([["DCv-Min","DCv-MAX"],["SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]],method = 'Time_all', ylabels = ["Volts (V)", "Volts (V)","Current (A)"], yaxis = '', xaxis = '2022-11-21 (AEST)')
+    obj.single_plot_2y(["DCv-Min","DCv-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"],["r","b","g","m","y","c"],method = "Time_all")
     #obj.save_compress("zip")
 
     # function that shows the plots. Must be called after they are created
-    plt.legend(loc='upper right')
     plt.show()

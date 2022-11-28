@@ -186,8 +186,7 @@ This program has been developed to read in an EDM datafile (.txt extention or .d
 
         Convert_channel(channel, scale_factor)
 
-            Method which will scale the data in a certain column assuming the average value of the data is scale factor
-            Used for special case readability
+            Method which will scale the data igiven  factor which represents the unit per division in the the data set.
 
             Inputs:
                 channel - string for the column name to convert
@@ -201,18 +200,20 @@ This program has been developed to read in an EDM datafile (.txt extention or .d
                     - needs to be made with more depth, would like to be able to scale with what one value is equal to.
 
 
-        Subplot_data(columns, method = 'Time_real', fontsize = 18, yaxis = 'yaxis', xaxis = 'Date and Time')
+        Subplot_data(columns, method = 'Time_real', fontsize = 18,legendsize = 10, yaxis = 'yaxis', xaxis = 'Date and Time', ylabels = None)
 
             Method to create a figure with subplots for specific columns of data.
 
             Inputs:
-                columns - a list of strings containing the columns that need to be plotted
+                columns - a list of strings containing the columns that need to be plotted. Also accepts a list of lists where each list is a list of strings to plot multiple lines per subplot
                 method - a string selector
                         'Time_real' - will only plot time stamps from the EDM
                         'Time_all' - will plot all rows of data with generated time stamps
                 fontsize - an int relating to the fontsize of the major axis labels
+                legendsize - an int relating to the size of the plot legends
                 yaxis - a string to print as the major y-axis label
                 xaxis - a string to print as the major x-axis label
+                ylabels - a list represending the minior y-axis labels
 
             Dependencies:
                 Graphing()
@@ -249,8 +250,29 @@ This program has been developed to read in an EDM datafile (.txt extention or .d
             Inputs
                 directory - the directory to search (relative or root path)
                 extension - the file extension to search for (defaults to .txt)
+
+
+        single_plot_2y(axis1, axis2, colours, method = 'Time_real', xaxis = "time", yaxis ="data",yaxis2 = "data2", legendsize = 10)
+
+            Method used to plot several columns of data on a sigle plot with 2 separate y-axis              
+
+            Inputs:
+                axis1 - a list of strings containing the columns that need to be plotted on the left y-axis
+                axis2 - a list of strings containing the columns for the right y-axis
+                colours - a list of colours to plot the lines in. Required to have enough for eaxh line to be plotted.
+                method - a string selector
+                        'Time_real' - will only plot time stamps from the EDM
+                        'Time_all' - will plot all rows of data with generated time stamps
+                legendsize - an int relating to the size of the plot legends
+                yaxis - a string to print as the left y-axis label
+                yaxis2 - a string to print as the right y-axis label 
+                xaxis - a string to print as the major x-axis label
+
+            Dependencies:
+                Graphing()
+                    mkadata()
+                        ext_time_d() - 'Time_all' option only
                         
-    
     
 '''
 
@@ -469,7 +491,7 @@ class Graphing:
             plot_data.plot(style = "-o", markersize= 1, linewidth = 0.5)    # plot dataframe with dots as data points and lines connecting them
         else:
             plot_data[specific].plot(style = "-o", markersize= 1, linewidth = 0.5) # plot data by indetifed columns names from 'specific' variable
-
+        plt.legend(loc='upper right')
         
     # Method for plotting each data channel individually (all data)
     def mkGraph_all_add(self, start_time = None):
@@ -497,7 +519,7 @@ class Graphing:
         for i in range(plot_data.shape[1]):                             # loop over data fram and plot each column on its own plot
             plt.figure(str(self.columnNames[i]))
             plot_data.loc[:,self.columnNames[i]].plot(style = "-o", markersize= 1, linewidth = 0.5)    # plot each column of the dataframe with dots as data points and lines connecting them
-        
+            plt.legend(loc='upper right')
     # Method for plotting only EDM timestamped data
     def mkGraph_true(self, specific = None, start_time = None):
         #plt.figure()
@@ -526,7 +548,8 @@ class Graphing:
             plot_data.plot(style = "-o", markersize= 1, linewidth = 0.5)    # plot dataframe with dots as data points and lines connecting them
         else:
             plot_data[specific].plot(style = "-o", markersize= 1, linewidth = 0.5) #plot only specified columns with dots as data points and lines connecting them
-
+        plt.legend(loc='upper right')
+        
     # Method for plotting only EDM timestamped data individual columns
     def mkGraph_all_true(self, start_time = None):
         plot_data = self.pdData                                         # Create temp dataframe
@@ -555,6 +578,7 @@ class Graphing:
         for i in range(plot_data.shape[1]):
             plt.figure(str(self.columnNames[i]))
             plot_data.loc[:,self.columnNames[i]].plot(style = "-o", markersize= 1, linewidth = 0.5)    # plot each column of the dataframe with dots as data points and lines connecting them
+            plt.legend(loc='upper right')
 
         
     # Method for plotting instantaneous data
@@ -574,6 +598,8 @@ class Graphing:
                 plot_data = plot_data.astype(int)
         print(plot_data)                                                # print data frame
         plot_data.plot(style = "-o", markersize= 1, linewidth = 0.5)    # plot data frame
+        plt.legend(loc='upper right')
+
         
     # Method for saving data fram as a compressed CSV file
     def save_compress(self,flag):
@@ -629,20 +655,22 @@ class Graphing:
             self.filename = outfilename                                                     # set outfile name and set placeholder as the objects main dataframe 
             self.pdData = self.pdBigData
 
-    
+    # Method for converting the channel into usable data
     def Convert_channel(self,channel, scale_factor):
         self.convert_flag = True
         #avg = self.pdData[channel].mean()
         #factor = avg/scale_factor
-        self.pdData[channel] = (self.pdData[channel].astype(float))*scale_factor
+        self.pdData[channel] = (self.pdData[channel].astype(float))*scale_factor            # Multiply the data by the scaling factor provided
         #print(factor)
 
-    def Subplot_data(self,columns, method = 'Time_real', fontsize = 18, yaxis = 'yaxis', xaxis = 'Date and Time', ylabels = None):
-        plt.rcParams.update({'font.size': fontsize})
-        f, axes = plt.subplots(len(columns),1, sharex = True, figsize = (20,10))
+    # Method for plotting specific columns of data into subplots with axis info and titles 
+    def Subplot_data(self,columns, method = 'Time_real', fontsize = 18,legendsize = 10, yaxis = 'yaxis', xaxis = 'Date and Time', ylabels = None):
+
+        plt.rcParams.update({'font.size': fontsize})                                # adjust fontzise
+        f, axes = plt.subplots(len(columns),1, sharex = True, figsize = (20,10))    # Create number of subplot figures based on the passed column list
 
         if ylabels == None:
-            ylabels = columns   
+            ylabels = columns                                               # If labels not defined use pased column names   
 
         if method == 'Time_real':                                           # If using only timestamped sections
             plot_data = self.pdData.drop(columns='Time')                      # Drop crontructed date time column 
@@ -671,8 +699,8 @@ class Graphing:
         print(plot_data)                                                # print data frame to be plotted
 
         for k in range(len(columns)):
-            plot_data[columns[k]].plot(ax = axes[k], style = "-o", markersize= 1, linewidth = 0.5, ylabel = ylabels[k])
-            axes[k].legend(loc = 'upper right')
+            plot_data[columns[k]].plot(ax = axes[k], style = "-o", markersize= 1, linewidth = 0.5, ylabel = ylabels[k])         # For length of columns plot each column on a separate axis 
+            axes[k].legend(loc = 'upper right',prop={'size': legendsize})                                                       # Set legend location and size
             
         plt.xlabel("")
         f.supylabel(yaxis)                                              # apply labels 
@@ -715,16 +743,44 @@ class Graphing:
     def collect_files(self,extension = ".txt",directory = ""):
         return sorted(glob.glob(directory+'*'+extension))
 
-    def single_plot_2y(self,axis1, axis2,method = 'Time_real', start_time = None):
-        
+    # Method for plotting several columns on one plot with 2 yaxis.
+    def single_plot_2y(self,axis1, axis2, colours, method = 'Time_real', xaxis = "time", yaxis ="data",yaxis2 = "data2", legendsize = 10):
+
+        plt.rcParams.update({'font.size': 12})                              # Adjust fontsize
+        len1 = len(axis1)                                                   # get number of lines per axis
+        len2 = len(axis2)
         if method == 'Time_real':                                           # If using only timestamped sections
             plot_data = self.pdData.drop(columns='Time')                      # Drop crontructed date time column 
             plot_data = plot_data[plot_data.Time_r.notnull()]               # remove rows with null date time stamps
+            plot_data = plot_data.drop_duplicates()                         # remove duplicate rows from the data fram from overlapping data.
             plot_data = plot_data.set_index('Time_r')                       # set index as date time stamps
+            fig,ax = plt.subplots()                                         # Create a Subplot
+            ax.set_prop_cycle(color=colours[0:len1])                        # Set colour cycle to choose the first number of colours from the provided list
+            ax.plot(plot_data[axis1], marker= "o",markersize = 2)           # Plot lines passed from axis1 on axis ax       
+            ax.set_xlabel(xaxis)                                            # Apply x and y lables
+            ax.set_ylabel(yaxis)
+            ax.legend(axis1, loc = 'upper left',prop={'size': legendsize})  # Apply legend next to the related axis 
+            ax2 = ax.twinx()                                                # Create second y-axis
+            ax2.set_prop_cycle(color=colours[len1:])                        # Set colour cycle to use the remaning colours 
+            ax2.plot(plot_data[axis2], marker= "o",markersize = 2)          # Plot lines specified in axis2
+            ax2.set_ylabel(yaxis2)                                          # Label axis
+            ax2.legend(axis2, loc = 'upper right',prop={'size': legendsize})# Apply legend next to the appropritae axis 
             
         elif method == 'Time_all':
             plot_data = self.pdData.set_index('Time')                       # Create temp data frame and set index to contructed date time stamps
+            plot_data = plot_data.drop_duplicates()                         # Remove duplicate rows from the data frame due to overlapping of the data files
             plot_data = plot_data.drop(columns='Time_r')                    # Drop real date time stamps from the set
+            fig,ax = plt.subplots()                                         # Create subplot
+            ax.set_prop_cycle(color =colours[0:len1])                       # Set colour cycle to use the first len1 colours 
+            ax.plot(plot_data[axis1], marker= "o",markersize = 2)           # Plot axis1 lines 
+            ax.set_xlabel(xaxis)                                            # Apply x and y1 labels
+            ax.set_ylabel(yaxis)
+            ax.legend(axis1,loc = 'upper left',prop={'size': legendsize})   # Apply legend for axis1 next to appropriate axis
+            ax2 = ax.twinx()                                                # Create second y-axis
+            ax2.set_prop_cycle(color =colours[len1:])                       # Set colour cycle to use the remaing colours provided
+            ax2.plot(plot_data[axis2], marker= "o",markersize = 2)          # Plot the axis2 lines on the second y-axis 
+            ax2.set_ylabel(yaxis2)                                          # Label second y-axis 
+            ax2.legend(axis2, loc = 'upper right',prop={'size': legendsize})# Apply legend next to the appropritae axis 
 
         else:                                                               # handle error in method
             print("Unavailable method, Options are:")

@@ -109,10 +109,17 @@ To use this module for an explicit data set ensure that Pandas, Numpy and Matplo
       
       pip3 install matplotlib
 
-This can be done in the standard or a virtual environment. Copy **Graph.py** and **example.py** to the same directory as your datafile/s Then either write your own .py script or modify **example.py** to suit your needs. To run the script navigate to the directory of the script in a terminal and run:
+This can be done in the standard or a virtual environment. Copy **Graph.py** and **_graph.py** to the same directory as your datafile/s Then modify **_graph.py** with the appropriate settings selected (OpenCsv, single_file, channel_names etc). To run the script navigate to the directory of the script in a terminal and run:
 
-      python3 your_script.py
+      python3 _graph.py
       
+Ensure that the file name or directory in _graph.py which points to the file/directory is correct from the directory you are running the script in. Furthermore several pieces of information from the data file are requried by the user in _graph.py (hexadecimal, instantaneous data, Csv file, saving etc) and these need to be selected appropriatly. For example if you do not select __ints_data__ but select Graph_ints and/or Graph_2y_ints these plots will be ignored.
+
+Finally if processing multiple data files it is recomended to do preliminary plotting to ensure the data is converted appropritately and save it as a compressed csv by setting:
+
+      save = True
+
+As this will significantly reduce the subsequent processing time for creating specific and more precise plots as the data will have to be processed every time. It is much quicker just to load in a csv.zip 
 ### TO DO
 
 Reassess the badding functionality of loggingGit.py as the graphing utility does not require it and it may be redundant.

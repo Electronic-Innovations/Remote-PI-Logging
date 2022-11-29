@@ -114,7 +114,7 @@ if __name__ == "__main__":
     # inacurate as the mkdata() function is called several times in the join_data_text() function.
 
 
-    #######################################
+    ########################################################
     #Assorted testing
 
 
@@ -127,29 +127,29 @@ if __name__ == "__main__":
 
     # Create Object
     obj = Graphing("TD_SA/2022-11-22__05_00.txt", hexflag = False)
-    #filelist = obj.collect_files(directory = "TD_SA/2022-11")
+    filelist = obj.collect_files(directory = "TD_SA/2022-11")
     #obj.mkdata()
     
     #obj.Histogram_data()
-    obj.open_csv("TD_SA/SA_NovNew.csv.zip")
+    #obj.open_csv("TD_SA/SA_NovNew.csv.zip")
     # Replacement mkdata
-    #obj.join_data_text(filelist, "TD_SA/SA_Nov.txt")
-    #obj.Histogram_data()
-    obj.name_channel(channel_names)
+    obj.join_data_text(filelist, "TD_SA/SA_Nov.txt")
+    obj.Histogram_data()
+    #obj.name_channel(channel_names)
     # Converting voltages
     scale= (2440/97310)
-    obj.Convert_channel(["DCv-Min","DC-v","Sph-V","Rph-V","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],scale)
+    #obj.Convert_channel(["DCv-Min","DC-v","Sph-V","Rph-V","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],scale)
     temp =2322.3006944444446
     factor = 65/temp
-    obj.Convert_channel(["Rph-I","Sph-I","RphI-Min","SphI-Min","RphI-MAX","SphI-MAX"],factor)
+    #obj.Convert_channel(["Rph-I","Sph-I","RphI-Min","SphI-Min","RphI-MAX","SphI-MAX"],factor)
     #obj.mkGraph_true(specific = ["DCv-Min","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX","SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"],start_time = None)
     #obj.mkGraph_true()
     #obj.ext_time_d()
     #obj.mkGraph_add()
     #obj.mkGraph_add(specific = ["Rph-I"])
     #obj.mkGraph_add(specific = ["DCv-Min","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX","SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"],start_time = None)
-    obj.Subplot_data([["DCv-Min","DCv-MAX"],["SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]],method = 'Time_all', ylabels = ["Volts (V)", "Volts (V)","Current (A)"], yaxis = '', xaxis = '2022-11-21 (AEST)')
-    obj.single_plot_2y(["DCv-Min","DCv-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"],["r","b","g","m","y","c"],method = "Time_all")
+    #obj.Subplot_data([["DCv-Min","DCv-MAX"],["SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]],method = 'Time_all', ylabels = ["Volts (V)", "Volts (V)","Current (A)"], yaxis = '', xaxis = '2022-11-21 (AEST)')
+    #obj.single_plot_2y(["DCv-Min","DCv-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"],["r","b","g","m","y","c"],method = "Time_all")
     #obj.save_compress("zip")
 
     # function that shows the plots. Must be called after they are created

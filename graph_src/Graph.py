@@ -786,7 +786,46 @@ class Graphing:
             print("Unavailable method, Options are:")
             print("'Time_real'\t to plot with EDM time stamps\n'Time_all'\t to plot with added time stamps and all data")
             return
-        
+
+
+    def single_plot_2y_inst(self,axis1, axis2, colours, xaxis = "time", yaxis ="data",yaxis2 = "data2",y2lim = None, legendsize = 10,samplecut = 0,samplefact = None):
+
+        plt.rcParams.update({'font.size': 12})                              # Adjust fontsize
+        len1 = len(axis1)                                                   # get number of lines per axis
+        len2 = len(axis2)
+
+        plot_data = self.pdData.drop(columns='Time')                    # Drop crontructed date time column 
+        plot_data = plot_data.drop(columns = 'Time_r')                   # remove rows with null date time stamps
+        plot_data = plot_data.iloc[samplecut:]
+        plot_data = plot_data.reset_index()
+        if samplefact is not None:
+            plot_data['temp']= plot_data.index
+            plot_data['temp'] = plot_data['temp']*samplefact
+            plot_data = plot_data.set_index('temp')
+        plot_data = plot_data.astype(str)                               # convert data to string
+        if self.hexflag:                                                # check hexflag 
+            for i in range(plot_data.shape[1]):
+                plot_data[self.columnNames[i]] =plot_data[self.columnNames[i]].apply(int,base=16)
+                
+        else:                                                           # if no hex flag check if the data has been converted and set as float, if not set as int
+            if self.convert_flag:
+                plot_data = plot_data.astype(float)
+            else:
+                plot_data = plot_data.astype(int)
+        fig,ax = plt.subplots()                                         # Create a Subplot
+        ax.set_prop_cycle(color=colours[0:len1])                        # Set colour cycle to choose the first number of colours from the provided list
+        ax.plot(plot_data[axis1],marker= "o" ,markersize = 2)           # Plot lines passed from axis1 on axis ax       
+        ax.set_xlabel(xaxis)                                            # Apply x and y lables
+        ax.set_ylabel(yaxis)
+        ax.legend(axis1, loc = 'upper left',prop={'size': legendsize})  # Apply legend next to the related axis 
+        ax2 = ax.twinx()                                                # Create second y-axis
+        ax2.set_prop_cycle(color=colours[len1:])                        # Set colour cycle to use the remaning colours 
+        ax2.plot(plot_data[axis2],marker= "o",markersize = 2)          # Plot lines specified in axis2
+        ax2.set_ylabel(yaxis2)                                          # Label axis
+        ax2.legend(axis2, loc = 'upper right',prop={'size': legendsize})# Apply legend next to the appropritae axis
+        if y2lim is not None:
+            ax2.set_ylim(y2lim)
+            
 # Main area testing and funtions.
 if __name__ == "__main__":
     #test= Graphing("2022-10-24__07_00.txt")

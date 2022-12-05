@@ -23,17 +23,17 @@ if __name__ == "__main__":
     # Single data file flag set to true if only using a single data file
     single_file = False
     # Directory containing only the data files to be used for multiple file processing (single_file = False)
-    filedir = "TD_SA/2022-11"
+    filedir = "TD_SA/2022-11-30"
     # Type of file in directory to search for (".txt" or ".dta" only)
     filetype = ".txt"
     # If using mutilple files specify the name for the out file (if saving)
-    outfile = "TD_SA/SA_Nov.txt"
+    outfile = "TD_SA/SA_NovDec.txt"
     # If using a single file specify it 
-    infile = ""
+    infile = "TD_SA/2022-11-30__15_00.txt"
     # Specify using presaved csv.zip data (will override single file and multiple file specifications)
-    OpenCsv = True
+    OpenCsv = False
     # Csv.zip file name/path
-    csvfile = ""
+    csvfile = "TD_SA/SA_NovDecNew.csv.zip"
     # Specify if the data is in hexadecimal 
     hexfile = False
     # Specify if the data is instantaneous (heavily reduced functionality)
@@ -85,36 +85,38 @@ if __name__ == "__main__":
     Ilin_col = ['r','b']
 
     # Set to True to plot a single plot with only timestamped data 
-    Graph_stamped = True
+    Graph_stamped = False
     # Number of plots to create (match length of lists)
-    numberGS = 2
+    numberGS = 1
     # List of specific channels (None indicates all on one plot)
     specGS = [None, None]
     # List of times to start plotitng for each plot (sometimes is funky)
     startGS = [None, None]
 
     # Set to true to plot single plots using all the available data
-    Graph_all = True
+    Graph_all = False
     # Number of plots to create 
-    numberGA = 2
+    numberGA = 1
     # List of specific channels (None indicates all on one plot)
     specGA = [None,None]
     # List of times to start plotitng for each plot (sometimes is funky)
     startGA = [None,None]
 
     # Set to True to produce a subplot with 3 plots 
-    subplot = False
+    subplot = True
     # A list of lists containg the data columns to be plotted on each subplot 
     subplotdata = [["DCv-Min","DCv-MAX"],["SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]]
     # Labels for each yaxis of the plot
     subplot_ylabels = ["Volts (V)", "Volts (V)","Current (A)"]
     # Label for the shared xaxis of the plot
-    subplot_xlabel = "November 2022 JAP MINE"
+    subplot_xlabel = "November-December 2022 JAP MINE"
     # Super label for the Y axis (can be left blank )
-    subplot_yaxis = "DC Converter, Mains and Out Current"
+    subplot_yaxis = "Out Current, Mains and DC Converter"
+    # Set of Y limits for each subplot
+    subplot_ylim = [[None, None], [200, 260], [None,None]]
 
     # Set to true to produce a sing plot with 2 y-axis
-    ploty2 = True
+    ploty2 = False
     # List of channels to plot on the first y-axis
     axis1 = ["DCv-Min","DCv-MAX"]
     # List of channels to plot on the second y-axis
@@ -133,7 +135,7 @@ if __name__ == "__main__":
 
     if OpenCsv:
         obj = Graphing("", hexflag = hexfile)
-        obj.open_csv("TD_SA/SA_NovNew.csv.zip")
+        obj.open_csv(csvfile)
     else:
         if single_file:
             obj = Graphing(infile, hexflag = hexfile)
@@ -176,7 +178,7 @@ if __name__ == "__main__":
             obj.mkGraph_add(specific = specGA[idz], start_time = startGA[idz])
 
     if subplot:
-        obj.Subplot_data(subplotdata,method = data_method, ylabels = subplot_ylabels, yaxis = subplot_yaxis, xaxis = subplot_xlabel)
+        obj.Subplot_data(subplotdata,method = data_method, ylabels = subplot_ylabels, yaxis = subplot_yaxis, xaxis = subplot_xlabel, ylim = subplot_ylim)
 
     if ploty2:
         obj.single_plot_2y(axis1,axis2,line_col,method = data_method)

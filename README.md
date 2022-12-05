@@ -86,7 +86,7 @@ To manually run this program call the following command
 
       ./Remote-Pi-Logging/loggingGit.py
 
-This will call do the following steps.
+This call will do the following steps.
 
 #### Reading from the EDM
 The first section of the script opens a serial port to the EDM and requests that the EDM sends through its stored data in decimal form. This is then saved directly to a file in the **data_backup** directory. The naming scheme for these files is **yyyy_mm_dd__HH_MM.txt**. The rest of the program uses this file to asses the data and construct consequent files.
@@ -99,7 +99,7 @@ The final section of the program appeneds the newly recieved data to a .txt file
 
 
 # Graphing and Data Processing
-A python based graphing and processing utility has been added which utilises Pandas, Numpy and Matplotlib. These packages will need to be installed on any device which wishes to utilise this module. It is not advised to use the RPIs for this process and it should be completed on an office computer or laptop. This module also allows the user to convert the text files of data to compressed csv files, join several text files together and complete basic data scaling. The main module of this utility can be found at **graph_src/Graph.py** and contains detailed descriptions of how the module operates and available functions. A test script showing the usage in python of this module can be found at **graph_src/example.py**.
+A python based graphing and processing utility has been added which utilises Pandas, Numpy and Matplotlib. These packages will need to be installed on any device which wishes to utilise this module. It is not advised to use the RPIs for this process and it should be completed on an office computer or laptop. This module also allows the user to convert the text files of data to compressed csv files, join several text files together and complete basic data scaling. The main module of this utility can be found at **graph_src/Graph.py** and contains detailed descriptions of how the module operates and available functions. A test script showing the usage in python of this module can be found at **graph_src/_graph.py**.
 
 To use this module for an explicit data set ensure that Pandas, Numpy and Matplotlib are installed by running the following commands:
 
@@ -113,7 +113,7 @@ This can be done in the standard or a virtual environment. Copy **Graph.py** and
 
       python3 _graph.py
       
-Ensure that the file name or directory in _graph.py which points to the file/directory is correct from the directory you are running the script in. Furthermore several pieces of information from the data file are requried by the user in _graph.py (hexadecimal, instantaneous data, Csv file, saving etc) and these need to be selected appropriatly. For example if you do not select __ints_data__ but select Graph_ints and/or Graph_2y_ints these plots will be ignored.
+Ensure that the file name or directory for the data in _graph.py is correct. Furthermore several pieces of information from the data file are requried by the user in _graph.py (hexadecimal, instantaneous data, Csv file, saving etc) and these need to be selected appropriatly. For example if you do not select __ints_data__ but select Graph_ints and/or Graph_2y_ints these plots will be ignored.
 
 Finally if processing multiple data files it is recomended to do preliminary plotting to ensure the data is converted appropritately and save it as a compressed csv by setting:
 
@@ -122,14 +122,14 @@ Finally if processing multiple data files it is recomended to do preliminary plo
 As this will significantly reduce the subsequent processing time for creating specific and more precise plots as the data will have to be processed every time. It is much quicker just to load in a csv.zip 
 ### TO DO
 
-Reassess the badding functionality of loggingGit.py as the graphing utility does not require it and it may be redundant.
+Reassess the padding functionality of loggingGit.py as the graphing utility does not require it and it may be redundant.
 
-File containing only timestamped data (Ross)
+File containing only timestamped data (Ross) - can plot exclusively stamped data 
 
-Addnig timestamps to all data points 
+Addnig timestamps to all data points - done in the graphin utility 
 
 Graphana or other web server plotting 
 
-Compression and data managment
+Compression and data managment - graphing utility saves data to a compressed csv
 - using numpy and scipy to store the concatenated data for MATLAB
 - potentially making the storage of the padded files optional (ie removing them after appending)

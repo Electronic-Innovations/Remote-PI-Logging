@@ -60,6 +60,14 @@ if __name__ == "__main__":
     # A list of scaling factors to be multiplied by the values in the columns
     scale_factors = [scale factor 1, scale factor 2, scale factor 3]
 
+    # Options for mkdata specify all or none 
+    # Width of data (number of channels being recorded) determined by histogram leave as None if not specified
+    histwidth = None
+    histwidth_t = None    # (columns with time stamps)
+    # Number of rows between time stamps (provided by histogram) Leave as None if not specified 
+    pglen = None
+
+
     # Set to true if you wish to save the data frame as a csv
     save = False
     # Copression type ('zip' or 'gzip' only at the moment)
@@ -149,11 +157,11 @@ if __name__ == "__main__":
     else:                                                                           # If not open csv check if single file then oprn and make dataframe 
         if single_file:
             obj = Graphing(infile, hexflag = hexfile)
-            obj.mkdata()
+            obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
         else:                                                                       # Otherwise assume collating several files
             obj = Graphing("", hexflag = hexfile)
             filelist = obj.collect_files(extension = filetype, directory = filedir) # Get list of files from directory and make dataframe 
-            obj.join_data_text(filelist, outfile)
+            obj.join_data_text(filelist, outfile, mkwidth = histwidth, mkwidth_t = histwidth_t, mkdepth = pglen)
 
     obj.name_channel(channel_names)                                                 # Name channels 
 

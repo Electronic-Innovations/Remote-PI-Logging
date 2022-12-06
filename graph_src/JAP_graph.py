@@ -23,13 +23,13 @@ if __name__ == "__main__":
     # Single data file flag set to true if only using a single data file
     single_file = False
     # Directory containing only the data files to be used for multiple file processing (single_file = False)
-    filedir = "TD_SA/2022-11-30"
+    filedir = "TD_SA/2022-12"
     # Type of file in directory to search for (".txt" or ".dta" only)
     filetype = ".txt"
     # If using mutilple files specify the name for the out file (if saving)
-    outfile = "TD_SA/SA_NovDec.txt"
+    outfile = "TD_SA/SA_Dec.txt"
     # If using a single file specify it 
-    infile = "TD_SA/2022-11-30__15_00.txt"
+    infile = "AN_DAT/2022-12-02__06_00.txt"
     # Specify using presaved csv.zip data (will override single file and multiple file specifications)
     OpenCsv = False
     # Csv.zip file name/path
@@ -39,20 +39,25 @@ if __name__ == "__main__":
     # Specify if the data is instantaneous (heavily reduced functionality)
     intsdata = False
     # Specify if a historgram of EDM page length (rows between time stamps) and width (number of data columns) is requried 
-    histogram = False
+    histogram = True
     # Specify if you wish to remove sections of data with columns smaller than the lagest from the historgam ( depreciated )
-    removenone = False
+    removenone = True
 
     # Names of data channes recorded by the EDM in order from left to right in the file ( required for plotting )
     channel_names = ["DC-v","Sph-V","Rph-V","Rph-I","Sph-I","DCv-Min","SphV-Min","RphV-Min","RphI-Min","SphI-Min","DCv-MAX", "SphV-MAX","RphV-MAX","RphI-MAX","SphI-MAX"]
     # Specify if all data should be plotted ('Time_all') or only time stamped data ('Time_real') for Subplots ansd 2yplot
-    data_method = 'Time_all'
+    data_method = 'Time_real'
     # Specify if data columns should be scaled 
-    scaling = True
+    scaling = False
     # Provide a list of columns to be scaled (list of list if they are scaled by the same factor )
     columns = [["DCv-Min","DC-v","Sph-V","Rph-V","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"], ["Rph-I","Sph-I","RphI-Min","SphI-Min","RphI-MAX","SphI-MAX"]]
     # A list of scaling factors to be multiplied by the values in the columns
     scale_factors = [(2440/97310), 65/2322.3006944444446]
+    # Width of data (number of channels being recorded) determined by histogram leave as None if not specified
+    histwidth = 15
+    histwidth_t = 16    # columns with dime stamps)
+    # Number of rows between time stamps (provided by histogram) Leave as None if not specified 
+    pglen = 8
 
     # Set to true if you wish to save the data frame as a csv
     save = False
@@ -94,7 +99,7 @@ if __name__ == "__main__":
     startGS = [None, None]
 
     # Set to true to plot single plots using all the available data
-    Graph_all = False
+    Graph_all = True
     # Number of plots to create 
     numberGA = 1
     # List of specific channels (None indicates all on one plot)
@@ -103,7 +108,7 @@ if __name__ == "__main__":
     startGA = [None,None]
 
     # Set to True to produce a subplot with 3 plots 
-    subplot = True
+    subplot = False
     # A list of lists containg the data columns to be plotted on each subplot 
     subplotdata = [["DCv-Min","DCv-MAX"],["SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]]
     # Labels for each yaxis of the plot
@@ -139,11 +144,11 @@ if __name__ == "__main__":
     else:
         if single_file:
             obj = Graphing(infile, hexflag = hexfile)
-            obj.mkdata()
+            obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
         else:
             obj = Graphing("", hexflag = hexfile)
             filelist = obj.collect_files(extension = filetype, directory = filedir)
-            obj.join_data_text(filelist, outfile)
+            obj.join_data_text(filelist, outfile, mkwidth = histwidth, mkwidth_t = histwidth_t, mkdepth = pglen)
 
     obj.name_channel(channel_names)
 

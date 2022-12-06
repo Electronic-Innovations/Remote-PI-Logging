@@ -29,12 +29,15 @@ This program has been developed to read in an EDM datafile (.txt extention or .d
                 hexflag - a True/False flag to let the program know if the data is in hexadecimal
             
     
-         mkdata(width = None, width_t = None )
+         mkdata(width = None, width_t = None, depth = None )
 
              Method which uses the filename in the constructed class to search the current directory for the file
              then brings it into the program as a pandas dataframe. Input variables are used following a histogram of the data.
              Using these variables will select the width of the data and should be found as the bins with largest two counts
-             from the histogram functions. width_t = width +1 as per how mkdata runs.
+             from the histogram functions. width_t = width +1 as per how mkdata runs. Depth is provided from histogram_data() and is the number of
+             rows between timestamps.
+             All inuput variables are required when data filtering. Filtering occurs by checking of each row matches eitehr width or width_t
+             if not the entire stamped section is removed, simmiarly if the rows do not match that stamped section will be removed.
 
              Features:
                  Reads each line indifidually and breaks them up on whitespace. Searches for '%' to mark date stamps
@@ -378,7 +381,7 @@ class Graphing:
         #print(self.pdData.to_string())
         
     # Method that creates a pandas dataframe from a text file.        
-    def mkdata(self, width = None, width_t = None):
+    def mkdata(self, width = None, width_t = None, depth = None):
 
         #Open file
         with open(self.filename,'r') as datafile:
@@ -386,6 +389,7 @@ class Graphing:
             started = False                     # Start copying flag is false
             time = False                        # Time stamp Flag is false
             comment = False                     # Comment Flag is false
+            pop = False
             row_num = 0                                    # Flags are used during the read
                                                 #   process to keep column number conistent.
             vect = []                           # Empty list for appending
@@ -415,8 +419,18 @@ class Graphing:
                             time = True         # Set flag, mark index and set timedata string move to next item
                             pos = i
                             timedata = ''
-                            self.histogram_arr_depth.append(row_num)
-                            row_num =0
+                            if depth is not None:
+                                if (depth != row_num and row_num != 0) or pop:
+                                    print("Bad data page found removing:")
+                                    for p in range(row_num):
+                                        temp = self.dataframe.pop()
+                                        print(temp)
+                                    row_num = 0
+                                    pop = False
+                                    
+                                else:
+                                    self.histogram_arr_depth.append(row_num)
+                                    row_num =0
                             
                             continue
                         if linedata[i] == '%%': # Double % indicates comment set flag and break loop.
@@ -424,6 +438,8 @@ class Graphing:
                             break
                         if time == True:        # If time flag is set collect rest of line as one item
                             timedata += (' ') +linedata[i]
+
+
                     if time == True:            # If time flag is true vect is each element till pos plus timestamp
                         vect =(linedata[0:(pos)])
                         vect.append(timedata)
@@ -439,21 +455,24 @@ class Graphing:
                         if not vect or (vect[len(vect)-1].find('ok') != -1):
                             vect = vect[0:len(vect)-1]
                         vect.append('')
-                    row_num = row_num+1
 
                     #Useful Debug for finding areas of data that arent uniform in the file.
                     #print(vect)
                     #if(len(vect)> 10):
                         #raise Exception("stop")
+                    self.dataframe.append(vect)     # append vect to a list of lists to make a dataframe
+                    row_num = row_num+1
+                        
                     if width is not None:
                         if len(vect) == width or len(vect) == width_t:
-                            
-                            self.dataframe.append(vect)     # append vect to a list of lists to make a dataframe
+                            pass
                             
                         else:
-                            pass                            # if width is defined but does not match do not include
+                            pop = True                          # if width is defined but does not match do not include
                     else:
                         self.dataframe.append(vect)     # append vect to a list of lists to make a dataframe
+                        row_num = row_num+1
+                        
                        
                         
                     time =False                         # reset flags
@@ -656,7 +675,7 @@ class Graphing:
         self.convert_flag = True                                                # Ensure converted data is handeled when plotting
 
     # Method for joining datafiles into one dataframe 
-    def join_data_text(self,filelist,outfilename):
+    def join_data_text(self,filelist,outfilename, mkwidth = None, mkwidth_t = None, mkdepth = None):
 
         if self.pdData is not None:                                                         # check if a data frame aleardy exists
             self.pdBigData = self.pdData                                                    # set current dataframe to placeholder
@@ -665,7 +684,7 @@ class Graphing:
                 self.filename = name                                                        # loop over files, mkdata() and appened to placholder
                 print(self.filename)
                 self.pdData = None
-                self.mkdata()
+                self.mkdata(width = mkwidth, width_t = mkwidth_t, depth = mkdepth)
                 self.pdBigData = pd.concat([self.pdBigData,self.pdData], ignore_index = True)   
             self.filename = outfilename                                                     # save outfilename
             self.pdData = self.pdBigData                                                    # set placholder back to normal dataframe for other methods.
@@ -678,7 +697,7 @@ class Graphing:
                 if name == self.filename: continue                                          # Loop over names and append data frames togeteher
                 self.filename = name
                 print(self.filename)
-                self.mkdata()
+                self.mkdata(width = mkwidth, width_t = mkwidth_t, depth = mkdepth)
                 self.pdBigData = pd.concat([self.pdBigData,self.pdData], ignore_index = True)
                 self.pdData = None
             print(self.pdBigData)

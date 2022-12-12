@@ -53,6 +53,10 @@ if __name__ == "__main__":
     channel_names = ["Channel 1","Channel 2","Channel 3","Channel 4"]
     # Specify if all data should be plotted ('Time_all') or only time stamped data ('Time_real') for Subplots and 2yplot
     data_method = 'Time_all'
+    # Specifiy if column Aveerages sgould be orinted to the terminal (useful for scaling)
+    average = True
+    # Which columns to average and print (None = all columns)
+    avg_cols = None
     # Specify if data columns should be scaled 
     scaling = True
     # Provide a list of columns to be scaled (list of list if they are scaled by the same factor )
@@ -143,8 +147,12 @@ if __name__ == "__main__":
     xlab = "time"
     # first yaxis label
     ylab1 = "ylabel1"
+    # Fist y-axis limits
+    y1lim = None
     # second yaxis label 
     ylab2 = "ylabel2"
+    # Second Y-axis Limits
+    y2lim = None
 
 
 # Appliaction section #
@@ -170,6 +178,9 @@ if __name__ == "__main__":
 
     if removenone:                                                                  # If removing data lines smaller than the largest is selected
         obj.Remove_None()
+
+    if average:
+        obj.print_avg(avg_cols)
 
     if scaling:                                                                     # If Converting data run the converting data section for each data list of columns
         for idx in range(len(columns)):
@@ -199,7 +210,7 @@ if __name__ == "__main__":
         obj.Subplot_data(subplotdata,method = data_method, ylabels = subplot_ylabels, yaxis = subplot_yaxis, xaxis = subplot_xlabel,ylim = subplot_ylim)
 
     if ploty2:                                                                      # Check if plotting a 2 y-axis plot and plot using the specified configuration
-        obj.single_plot_2y(axis1,axis2,line_col,method = data_method, xaixs = xlab, yaxis = ylab1, yaxis2 = ylab2, legendsize = 10)
+        obj.single_plot_2y(axis1,axis2,line_col,method = data_method, xaixs = xlab, yaxis = ylab1, yaxis2 = ylab2, ylim1 = y1lim, ylim2 = y2lim legendsize = 10)
 
     if save:                                                                        # Check if saving data to a specified compression csv file.
         obj.save_compress(compression)

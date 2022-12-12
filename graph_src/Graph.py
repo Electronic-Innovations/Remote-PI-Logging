@@ -305,8 +305,11 @@ This program has been developed to read in an EDM datafile (.txt extention or .d
     
 '''
 
+import unittest
 import glob
 import string
+import os
+from random import randint
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -352,6 +355,7 @@ class Graphing:
         col = col.notna().to_numpy()
         idx = np.where(col == True)
         idx = list(idx[0])                                                                              #Collect row indexs for each timestamp in the data frame
+        steps = 1
         for i in range(len(idx)):
             if i == 0: continue                                                                         # Loop over indexs (skip the first one so we can compare backwards)
             if i == 1: old_diff = self.pdData.loc[idx[i],'Time'] - self.pdData.loc[idx[i-1],'Time']     # For the first section set old_diff the same as the current one
@@ -409,7 +413,7 @@ class Graphing:
                     linedata = line.split()
 
                     #Split line on whitespace and check if first elemet for (nothing, empty '', comment or split)
-                    if not linedata or linedata[0] == '' or linedata[0] == '%' or linedata[0] == '%%%' or linedata[0] == 'ok' or linedata[0] =='SSPRD_ALL' or linedata[0] =='..' or linedata[0] =='<sp' or linedata[0] =='d':
+                    if not linedata or linedata[0] == '' or linedata[0] == '%' or linedata[0] == '%%%' or linedata[0] == 'ok' or linedata[0] =='SSPRD_ALL' or linedata[0] =='..' or linedata[0] =='<sp' or linedata[0] =='d' or linedata[0] =='?':
                         continue                # skip to next line if so
 
                     # Cycle each part of the line
@@ -431,6 +435,9 @@ class Graphing:
                                 else:
                                     self.histogram_arr_depth.append(row_num)
                                     row_num =0
+                            else:
+                                self.histogram_arr_depth.append(row_num)
+                                row_num =0
                             
                             continue
                         if linedata[i] == '%%': # Double % indicates comment set flag and break loop.
@@ -460,12 +467,12 @@ class Graphing:
                     #print(vect)
                     #if(len(vect)> 10):
                         #raise Exception("stop")
-                    self.dataframe.append(vect)     # append vect to a list of lists to make a dataframe
-                    row_num = row_num+1
+
                         
                     if width is not None:
                         if len(vect) == width or len(vect) == width_t:
-                            pass
+                            self.dataframe.append(vect)     # append vect to a list of lists to make a dataframe
+                            row_num = row_num+1
                             
                         else:
                             pop = True                          # if width is defined but does not match do not include
@@ -706,6 +713,10 @@ class Graphing:
 
     # Method for converting the channel into usable data
     def Convert_channel(self,channel, scale_factor):
+        if self.hexflag:
+            for i in range(self.pdData.shape[1]):
+                self.pdData[self.columnNames[i]] =self.pdData[self.columnNames[i]].apply(int,base=16)
+                self.hexflag = False
         self.convert_flag = True
         #avg = self.pdData[channel].mean()
         #factor = avg/scale_factor
@@ -795,7 +806,7 @@ class Graphing:
         return sorted(glob.glob(directory+'*'+extension))
 
     # Method for plotting several columns on one plot with 2 yaxis.
-    def single_plot_2y(self,axis1, axis2, colours, method = 'Time_real', xaxis = "time", yaxis ="data",yaxis2 = "data2", legendsize = 10):
+    def single_plot_2y(self,axis1, axis2, colours, method = 'Time_real', xaxis = "time", yaxis ="data",yaxis2 = "data2", ylim1 = None, ylim2 = None, legendsize = 10):
 
         plt.rcParams.update({'font.size': 12})                              # Adjust fontsize
         len1 = len(axis1)                                                   # get number of lines per axis
@@ -831,7 +842,12 @@ class Graphing:
             ax2.set_prop_cycle(color =colours[len1:])                       # Set colour cycle to use the remaing colours provided
             ax2.plot(plot_data[axis2], marker= "o",markersize = 2)          # Plot the axis2 lines on the second y-axis 
             ax2.set_ylabel(yaxis2)                                          # Label second y-axis 
-            ax2.legend(axis2, loc = 'upper right',prop={'size': legendsize})# Apply legend next to the appropritae axis 
+            ax2.legend(axis2, loc = 'upper right',prop={'size': legendsize})# Apply legend next to the appropritae axis
+
+        if ylim1 is not None:
+            ax.set_ylim(ylim1)                                         # Set yaxis 2 limits if provided
+        if ylim2 is not None:
+            ax2.set_ylim(ylim2)                                         # Set yaxis 2 limits if provided
 
         else:                                                               # handle error in method
             print("Unavailable method, Options are:")
@@ -875,7 +891,184 @@ class Graphing:
         ax2.set_ylabel(yaxis2)                                          # Label axis
         ax2.legend(axis2, loc = 'upper right',prop={'size': legendsize})# Apply legend next to the appropritae axis
         if y2lim is not None:
-            ax2.set_ylim(y2lim)                                         # Set yaxis 2 limits if provided 
+            ax2.set_ylim(y2lim)                                         # Set yaxis 2 limits if provided
+
+    # Method for providing averages over data columns
+    def print_avg(self, columns = None):
+        avg_data = self.pdData
+        avg_data = avg_data.drop(columns = "Time_r")
+        avg_data = avg_data.drop( columns = "Time")
+        if self.hexflag:
+            for i in range(avg_data.shape[1]):
+                avg_data[self.columnNames[i]] =avg_data[self.columnNames[i]].apply(int,base=16)
+        else:
+            avg_data = avg_data.astype(int)
+        if columns is None:
+            self.averages = avg_data.mean()
+            print(self.averages)
+        else:
+            self.averages = avg_data[columns].mean()
+            print(self.averages)
+
+
+
+class TestGraph(unittest.TestCase):
+
+    def test_single_file(self):
+        infile = "tests/singlefile.txt"
+        hexfile = False
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        self.assertEqual(obj.pdData.shape[0],7200)
+        self.assertEqual(obj.pdData.shape[1],17)
+
+    def test_single_file_bad(self):
+        infile = "tests/singlefile_bad.txt"
+        hexfile = False
+        histwidth = 15
+        histwidth_t = 16
+        pglen = 8
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        self.assertEqual(obj.pdData.shape[0],7160)
+        self.assertEqual(obj.pdData.shape[1],17)
+
+    def test_multifiles(self):
+        filedir = "tests/multifiles/"
+        filetype = ".txt"
+        outfile = "multifile.txt"
+        hexfile = False
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        obj = Graphing("", hexflag = hexfile)
+        filelist = obj.collect_files(extension = filetype, directory = filedir)
+        obj.join_data_text(filelist, outfile, mkwidth = histwidth, mkwidth_t = histwidth_t, mkdepth = pglen)
+        self.assertEqual(obj.pdData.shape[0],21600)
+        self.assertEqual(obj.pdData.shape[1],17)
+
+    def test_hexfile(self):
+        infile = "tests/hexfile.txt"
+        hexfile = True
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        self.assertEqual(obj.pdData.shape[0],9996)
+        self.assertEqual(obj.pdData.shape[1],11)
+
+    def test_hexfile_bad_WD(self):
+        infile = "tests/hexfile_bad.txt"
+        hexfile = True
+        histwidth = 9
+        histwidth_t = 10
+        pglen = 14
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        self.assertEqual(obj.pdData.shape[0],10010)
+        self.assertEqual(obj.pdData.shape[1],11)
+
+    def test_Column_name(self):
+        infile = "tests/singlefile.txt"
+        hexfile = False
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        channel_names = ["DC-v","Sph-V","Rph-V","Rph-I","Sph-I","DCv-Min","SphV-Min","RphV-Min","RphI-Min","SphI-Min","DCv-MAX", "SphV-MAX","RphV-MAX","RphI-MAX","SphI-MAX"]
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        obj.name_channel(channel_names)
+        channel_names.append("Time_r")
+        channel_names.append("Time")
+        self.assertEqual(channel_names, obj.columnNames)
+
+    def test_single_hexavg(self):
+        infile = "tests/hexfile.txt"
+        hexfile = True
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        avg_cols = None
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        obj.print_avg(columns = avg_cols)
+        self.assertEqual(round(obj.averages.iloc[0]),16487)
+        self.assertEqual(round(obj.averages.iloc[1]),8205)
+        self.assertEqual(round(obj.averages.iloc[2]),-8231)
+        self.assertEqual(round(obj.averages.iloc[3]),16479)
+        self.assertEqual(round(obj.averages.iloc[4]),8197)
+        self.assertEqual(round(obj.averages.iloc[5]),-8239)
+        self.assertEqual(round(obj.averages.iloc[6]),16497)
+        self.assertEqual(round(obj.averages.iloc[7]),8216)
+        self.assertEqual(round(obj.averages.iloc[8]),-8221)
+
+    def test_single_avg(self):
+        infile = "tests/singlefile.txt"
+        hexfile = False
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        avg_cols =None
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        obj.print_avg(columns = avg_cols)
+        self.assertEqual(round(obj.averages.iloc[0]),55)
+        self.assertEqual(round(obj.averages.iloc[1]),9808)
+        self.assertEqual(round(obj.averages.iloc[2]),9806)
+        self.assertEqual(round(obj.averages.iloc[3]),56)
+        self.assertEqual(round(obj.averages.iloc[4]),38)
+        self.assertEqual(round(obj.averages.iloc[5]),40)
+        self.assertEqual(round(obj.averages.iloc[6]),9784)
+        self.assertEqual(round(obj.averages.iloc[7]),9783)
+        self.assertEqual(round(obj.averages.iloc[8]),52)
+        self.assertEqual(round(obj.averages.iloc[9]),35)
+        self.assertEqual(round(obj.averages.iloc[10]),79)
+        self.assertEqual(round(obj.averages.iloc[11]),9834)
+        self.assertEqual(round(obj.averages.iloc[12]),9831)
+        self.assertEqual(round(obj.averages.iloc[13]),62)
+        self.assertEqual(round(obj.averages.iloc[14]),43)
+
+    def test_save_open(self):
+        infile = "tests/singlefile.txt"
+        hexfile = False
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        index = randint(0,7199)
+        column = randint(0,14)
+        compression = 'zip'
+        csvfile = "tests/singlefileNew.csv.zip"
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        channel_names = ["DC-v","Sph-V","Rph-V","Rph-I","Sph-I","DCv-Min","SphV-Min","RphV-Min","RphI-Min","SphI-Min","DCv-MAX", "SphV-MAX","RphV-MAX","RphI-MAX","SphI-MAX"]
+        obj.name_channel(channel_names)
+        obj.save_compress(compression)
+        obj2 = Graphing("",hexflag = hexfile)
+        obj2.open_csv(csvfile)
+        print(obj.pdData)
+        print(obj2.pdData)
+        self.assertEqual(obj.pdData[channel_names[column]].iloc[index],obj2.pdData[channel_names[column]].iloc[index])
+        self.assertEqual(obj.pdData.shape[0],obj2.pdData.shape[0])
+        self.assertEqual(obj.pdData.shape[1],obj2.pdData.shape[1])
+        os.remove("tests/singlefileNew.csv.zip")
+
+    def test_ext_time_d(self):
+        infile = "tests/singlefile.txt"
+        hexfile = False
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        index = randint(0,7199)
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        obj.ext_time_d()
+        while obj.pdData['Time_r'].iloc[index] is not None:
+            index = randint(0,7199)
+        self.assertIsNotNone(obj.pdData.shape[0],7200)
             
 # Main area testing and funtions.
 if __name__ == "__main__":

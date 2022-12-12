@@ -21,7 +21,7 @@ if __name__ == "__main__":
     # Data Input and dataframe building config #
 
     # Single data file flag set to true if only using a single data file
-    single_file = False
+    single_file = True
     # Directory containing only the data files to be used for multiple file processing (single_file = False)
     filedir = "TD_SA/2022-12"
     # Type of file in directory to search for (".txt" or ".dta" only)
@@ -29,15 +29,15 @@ if __name__ == "__main__":
     # If using mutilple files specify the name for the out file (if saving)
     outfile = "TD_SA/SA_Dec.txt"
     # If using a single file specify it 
-    infile = "Perth_test_INST02.txt"
+    infile = "TD_INTS/2022-12-07__08_00.txt"
     # Specify using presaved csv.zip data (will override single file and multiple file specifications)
-    OpenCsv = True
+    OpenCsv = False
     # Csv.zip file name/path
-    csvfile = "TD_SA/SA_DecNew.csv.zip"
+    csvfile = "TD_SA/SA_NovDecNew.csv.zip"
     # Specify if the data is in hexadecimal 
     hexfile = False
     # Specify if the data is instantaneous (heavily reduced functionality)
-    intsdata = False
+    intsdata = True
     # Specify if a historgram of EDM page length (rows between time stamps) and width (number of data columns) is requried 
     histogram = False
     # Specify if you wish to remove sections of data with columns smaller than the lagest from the historgam ( depreciated )
@@ -54,13 +54,13 @@ if __name__ == "__main__":
     # A list of scaling factors to be multiplied by the values in the columns
     scale_factors = [(2440/97310), 65/2322.3006944444446]
     # Width of data (number of channels being recorded) determined by histogram leave as None if not specified
-    histwidth = 15
-    histwidth_t = 16    # columns with dime stamps)
+    histwidth = None
+    histwidth_t = None    # columns with dime stamps)
     # Number of rows between time stamps (provided by histogram) Leave as None if not specified 
-    pglen = 8
+    pglen = None
 
     # Set to true if you wish to save the data frame as a csv
-    save = True
+    save = False
     # Copression type ('zip' or 'gzip' only at the moment)
     compression = 'zip'
 
@@ -68,7 +68,7 @@ if __name__ == "__main__":
     # GRAPHING SELECTION #
 
     # Set to true to plot ints data
-    Graph_ints = False
+    Graph_ints = True
     
     # Set to true to plot instantaneous data on one plot with two axis
     Graph_2y_ints =False
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     # Set to True to produce a subplot with 3 plots 
     subplot = True
     # A list of lists containg the data columns to be plotted on each subplot 
-    subplotdata = [["DC-v"],["Sph-V","Rph-V"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]]
+    subplotdata = [["DCv-Min","DCv-MAX"],["SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]]
     # Labels for each yaxis of the plot
     subplot_ylabels = ["Volts (V)", "Volts (V)","Current (A)"]
     # Label for the shared xaxis of the plot

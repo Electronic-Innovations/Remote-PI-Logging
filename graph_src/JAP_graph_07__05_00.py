@@ -21,7 +21,7 @@ if __name__ == "__main__":
     # Data Input and dataframe building config #
 
     # Single data file flag set to true if only using a single data file
-    single_file = False
+    single_file = True
     # Directory containing only the data files to be used for multiple file processing (single_file = False)
     filedir = "TD_SA/2022-12"
     # Type of file in directory to search for (".txt" or ".dta" only)
@@ -29,11 +29,11 @@ if __name__ == "__main__":
     # If using mutilple files specify the name for the out file (if saving)
     outfile = "TD_SA/SA_Dec.txt"
     # If using a single file specify it 
-    infile = "Perth_test_INST02.txt"
+    infile = "TD_SA/2022-12-07__05_00.txt"
     # Specify using presaved csv.zip data (will override single file and multiple file specifications)
-    OpenCsv = True
+    OpenCsv = False
     # Csv.zip file name/path
-    csvfile = "TD_SA/SA_DecNew.csv.zip"
+    csvfile = "TD_SA/SA_NovDecNew.csv.zip"
     # Specify if the data is in hexadecimal 
     hexfile = False
     # Specify if the data is instantaneous (heavily reduced functionality)
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     # Specify if all data should be plotted ('Time_all') or only time stamped data ('Time_real') for Subplots ansd 2yplot
     data_method = 'Time_all'
     # Specify if data columns should be scaled 
-    scaling = False
+    scaling = True
     # Provide a list of columns to be scaled (list of list if they are scaled by the same factor )
     columns = [["DCv-Min","DC-v","Sph-V","Rph-V","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"], ["Rph-I","Sph-I","RphI-Min","SphI-Min","RphI-MAX","SphI-MAX"]]
     # A list of scaling factors to be multiplied by the values in the columns
@@ -108,9 +108,9 @@ if __name__ == "__main__":
     startGA = [None,None]
 
     # Set to True to produce a subplot with 3 plots 
-    subplot = True
+    subplot = False
     # A list of lists containg the data columns to be plotted on each subplot 
-    subplotdata = [["DC-v"],["Sph-V","Rph-V"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]]
+    subplotdata = [["DCv-Min","DCv-MAX"],["SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]]
     # Labels for each yaxis of the plot
     subplot_ylabels = ["Volts (V)", "Volts (V)","Current (A)"]
     # Label for the shared xaxis of the plot
@@ -121,19 +121,21 @@ if __name__ == "__main__":
     subplot_ylim = [[None, None], [200, 260], [None,None]]
 
     # Set to true to produce a sing plot with 2 y-axis
-    ploty2 = False
+    ploty2 = True
     # List of channels to plot on the first y-axis
     axis1 = ["DCv-Min","DCv-MAX"]
     # List of channels to plot on the second y-axis
-    axis2 = ["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]
+    axis2 = ["Sph-V"]
     # Colours for each of the data channels (must match number of plotted lines)
-    line_col = ["r","b","g","m","y","c"]
+    line_col = ["r","b","g"]
     # X-axis label
     xlab = "time"
     # first yaxis label
-    ylab1 = "ylabel1"
+    ylab1 = "DC Voltage"
+    y1lim = [670,680]
     # second yaxis label 
-    ylab2 = "ylabel2"
+    ylab2 = "AC Mains S-phase"
+    y2lim = [240,250]
 
 
 # Appliaction section #
@@ -186,7 +188,7 @@ if __name__ == "__main__":
         obj.Subplot_data(subplotdata,method = data_method, ylabels = subplot_ylabels, yaxis = subplot_yaxis, xaxis = subplot_xlabel, ylim = subplot_ylim)
 
     if ploty2:
-        obj.single_plot_2y(axis1,axis2,line_col,method = data_method)
+        obj.single_plot_2y(axis1,axis2,line_col,method = data_method, xaxis = xlab, yaxis =ylab1,yaxis2 = ylab2, ylim1 = y1lim, ylim2 = y2lim)
 
     if save:
         obj.save_compress(compression)

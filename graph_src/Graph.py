@@ -222,7 +222,7 @@ This program has been developed to read in an EDM datafile (.txt extention or .d
 
             Dependencies:
                 Graphing()
-                    mkadata()
+                    mkdata()
                         ext_time_d() - 'Time_all' option only
 
 
@@ -275,8 +275,9 @@ This program has been developed to read in an EDM datafile (.txt extention or .d
 
             Dependencies:
                 Graphing()
-                    mkadata()
+                    mkdata()
                         ext_time_d() - 'Time_all' option only
+                        
 
         single_plot_2y_ints(axis1, axis2, colours, method = 'Time_real', xaxis = "time", yaxis ="data",yaxis2 = "data2", y2lim = None, legendsize = 10,samplecut = 0,samplefact = None)
 
@@ -299,8 +300,22 @@ This program has been developed to read in an EDM datafile (.txt extention or .d
 
             Dependencies:
                 Graphing()
-                    mkadata()
+                    mkdata()
                         ext_time_d() - 'Time_all' option only
+
+
+
+        print_avg(columns = None)
+
+            Method used to provide avearges for columns of data in the data frame. Useful for scaling the data of a conversion parameter is
+                not provided and the data maintains an average value
+
+            Inputs:
+                columns - a list of comlumn names to average and display (None will average and display all columns)
+
+            Dependencies:
+                Graphing()
+                    mkdata()
                         
     
 '''
@@ -393,8 +408,8 @@ class Graphing:
             started = False                     # Start copying flag is false
             time = False                        # Time stamp Flag is false
             comment = False                     # Comment Flag is false
-            pop = False
-            row_num = 0                                    # Flags are used during the read
+            pop = False                         # pop flag is False
+            row_num = 0                         # Flags are used during the read
                                                 #   process to keep column number conistent.
             vect = []                           # Empty list for appending
             timedata=[]                         # Special Timedata variable
@@ -403,64 +418,69 @@ class Graphing:
             for line in lines:
                 line = ''.join([x for x in line if x in string.printable])  # check for non-printable charachters and remove them
                 
-                if line.upper().isupper() and self.hexflag == False and (line.find('ok') == -1):      #If the line contains any letters (non-hex data) and skip if so    
+                if (line.upper().isupper() and line.find('%%') == -1) and self.hexflag == False and (line.find('ok') == -1):      #If the line contains any letters (non-hex data) and skip if so    
                     continue
                 if line.find('%') !=-1:             # If has a % set start flag
                     if line.find('31:63:63') != -1: # If has erased time skip
                         continue
-                    started =True               #   (first line should be a comment or have a timestamp with %)
+                    started =True               #   (first line of data will have a % with an non-erased timestamp)
                 if started ==True:
                     linedata = line.split()
 
-                    #Split line on whitespace and check if first elemet for (nothing, empty '', comment or split)
+                    #Split line on whitespace and check if first elemet for (nothing, empty '', comment or split) and other EDM responses that indicate the line contains no data
                     if not linedata or linedata[0] == '' or linedata[0] == '%' or linedata[0] == '%%%' or linedata[0] == 'ok' or linedata[0] =='SSPRD_ALL' or linedata[0] =='..' or linedata[0] =='<sp' or linedata[0] =='d' or linedata[0] =='?':
                         continue                # skip to next line if so
 
-                    # Cycle each part of the line
+                    # Cycle each part of the line to collect into columns for the data frame 
                     for i in range(len(linedata)):
-                        linedata[i] = linedata[i].replace('/x11','')
-                        if linedata[i] == '%':  # Single % indicates timestamp
-                            time = True         # Set flag, mark index and set timedata string move to next item
+                        linedata[i] = linedata[i].replace('/x11','')                # Again Strip out non-printable character
+                        if linedata[i] == '%':                                      # Single % indicates timestamp
+                            time = True                                             # Set flag, mark index and set timedata string move to next item
                             pos = i
                             timedata = ''
-                            if depth is not None:
-                                if (depth != row_num and row_num != 0) or pop:
-                                    print("Bad data page found removing:")
-                                    for p in range(row_num):
+                            if depth is not None:                                   # If a 'depth' (number of data entries per timestamp) has been provided
+                                if (depth != row_num and row_num != 0) or pop:      # Check if depth matches the counted rows (row_num) or if pop flag is set indicating rows have been dropped 
+                                    print("Bad data page found removing:")          # Notify User that bad data pages have been identified
+                                    for p in range(row_num):                        # Remove row_num data lines from the list, print each line to the user 
                                         temp = self.dataframe.pop()
-                                        print(temp)
-                                    row_num = 0
-                                    pop = False
-                                    
+                                        print(temp)                                 # 'row_num' counts rows between time stamps this ensure only one 'EDM page' of data is removed
+                                    row_num = 0                                     # This 'popping' does not effect the current line and only previous ones
+                                    pop = False                                     
+                                                                                    # Reset row_num and pop flag
                                 else:
-                                    self.histogram_arr_depth.append(row_num)
+                                    self.histogram_arr_depth.append(row_num)        # If the row_num matches depth and pop has not been set save the number of rows and reset 
                                     row_num =0
                             else:
-                                self.histogram_arr_depth.append(row_num)
+                                self.histogram_arr_depth.append(row_num)            # If depth is not defined save rows and reset count
                                 row_num =0
                             
-                            continue
+                            continue                                                # Countinue to the section of the line following the '%'
+
+                        
                         if linedata[i] == '%%': # Double % indicates comment set flag and break loop.
-                            comment = True
+                            comment = True      # Stops cycling through components of the line without recordign more data
                             break
-                        if time == True:        # If time flag is set collect rest of line as one item
+                        if time == True:        # If time flag is set collect rest of line as one item (cycling through the rest of the line)
                             timedata += (' ') +linedata[i]
 
 
-                    if time == True:            # If time flag is true vect is each element till pos plus timestamp
+
+                    # After cycling through the line using the flags to determine how to add it to the list of lists for pandas data frame conversion
+                    
+                    if time == True:                                    # If time flag is true vect is each element till pos (postion of the %) plus timestamp
                         vect =(linedata[0:(pos)])
                         vect.append(timedata)
                         self.histogram_arr_width.append(len(vect))
-                    elif comment:               # If comment flag is set vect is up until the latest i
+                    elif comment:                                       # If comment flag is set vect is up until the latest i (cycling is stopped after %%)
                         vect = linedata[0:i]
                         self.histogram_arr_width.append(len(vect))
-                    else:                       # Otherwise vect is every element
+                    else:                                               # Otherwise vect is every element (normal data row)
                         vect = linedata[0:i+1]
                         self.histogram_arr_width.append(len(vect))
 
                         # Remove any 'ok'
-                        if not vect or (vect[len(vect)-1].find('ok') != -1):
-                            vect = vect[0:len(vect)-1]
+                        if not vect or (vect[len(vect)-1].find('ok') != -1):    # Check if vect actually has data and if it has an 'ok'
+                            vect = vect[0:len(vect)-1]                          # Remove 'ok'
                         vect.append('')
 
                     #Useful Debug for finding areas of data that arent uniform in the file.
@@ -471,13 +491,14 @@ class Graphing:
                         
                     if width is not None:
                         if len(vect) == width or len(vect) == width_t:
-                            self.dataframe.append(vect)     # append vect to a list of lists to make a dataframe
+                            self.dataframe.append(vect)                 # if width is defined and matches the length of vect appened to list of lists
                             row_num = row_num+1
                             
                         else:
-                            pop = True                          # if width is defined but does not match do not include
+                            pop = True                                  # if width is defined but does not match do not appened or count
+                                                                        # Set pop flag to remove the page at the next timestamp.
                     else:
-                        self.dataframe.append(vect)     # append vect to a list of lists to make a dataframe
+                        self.dataframe.append(vect)     # If width is not provided simply append row
                         row_num = row_num+1
                         
                        
@@ -487,7 +508,7 @@ class Graphing:
                     vect = []                           # empty variables
                     timedata =[]
                     
-        
+        # After finishing reading the file
         self.pdData = pd.DataFrame(self.dataframe)                                                                                  # Create dataframe from list of lists
         temp = self.pdData.shape                                                                                                    # get axis length
         self.pdData["Time"] = pd.to_datetime(self.pdData[temp[1]-1],format=' %Y-%m-%d %H:%M:%S', errors = 'coerce')                 # Convert Time stamp strings to datetime objects
@@ -714,7 +735,7 @@ class Graphing:
     # Method for converting the channel into usable data
     def Convert_channel(self,channel, scale_factor):
         if self.hexflag:
-            for i in range(self.pdData.shape[1]):
+            for i in range(self.pdData.shape[1]):                                           # If data is provided in hexadecimal convert to INT 
                 self.pdData[self.columnNames[i]] =self.pdData[self.columnNames[i]].apply(int,base=16)
                 self.hexflag = False
         self.convert_flag = True
@@ -788,7 +809,7 @@ class Graphing:
     # Only works on datasets converted from a data file not a csv
     def Histogram_data(self):
         plt.figure()
-        print(np.histogram_bin_edges(self.histogram_arr_depth[1:],bins = list(range(max(self.histogram_arr_depth)+3))))
+        #print(np.histogram_bin_edges(self.histogram_arr_depth[1:],bins = list(range(max(self.histogram_arr_depth)+3))))
         counts_w, bins_w = np.histogram(self.histogram_arr_width, bins = list(range(max(self.histogram_arr_width)+3)))          # histogram width of data (column number consistency)
         plt.bar(bins_w[:-1], height=counts_w)     # plot histogram
         print(bins_w)                               # print bins and counts to terminal 
@@ -799,6 +820,10 @@ class Graphing:
         plt.bar(bins_d[:-1], height=counts_d)     # plot histogram
         print(bins_d)                               # print bins and counts to terminal
         print(counts_d)
+        self.counts_w = counts_w
+        self.counts_d = counts_d
+        self.bins_d = bins_d
+        self.bins_w = bins_w
         pass
 
     # Method for collecting all the filenames with a given extension and path to directory useful for the join method.
@@ -895,16 +920,18 @@ class Graphing:
 
     # Method for providing averages over data columns
     def print_avg(self, columns = None):
-        avg_data = self.pdData
+        avg_data = self.pdData                                          # Collect a copy of the data fram eand remove the time columns
         avg_data = avg_data.drop(columns = "Time_r")
         avg_data = avg_data.drop( columns = "Time")
         if self.hexflag:
-            for i in range(avg_data.shape[1]):
+            for i in range(avg_data.shape[1]):                          # If the data is Hexadecimal convert it to decimal intagers
+                
                 avg_data[self.columnNames[i]] =avg_data[self.columnNames[i]].apply(int,base=16)
-        else:
-            avg_data = avg_data.astype(int)
-        if columns is None:
-            self.averages = avg_data.mean()
+        elif self.convert_flag is False:
+            avg_data = avg_data.astype(int)                             # Otherwise convert from string if not already scaled
+            
+        if columns is None:                                             # If no columns are provided print all the averages
+            self.averages = avg_data.mean()                             # Otherwise only print and average the selected columns
             print(self.averages)
         else:
             self.averages = avg_data[columns].mean()
@@ -1049,8 +1076,8 @@ class TestGraph(unittest.TestCase):
         obj.save_compress(compression)
         obj2 = Graphing("",hexflag = hexfile)
         obj2.open_csv(csvfile)
-        print(obj.pdData)
-        print(obj2.pdData)
+        #print(obj.pdData)
+        #print(obj2.pdData)
         self.assertEqual(obj.pdData[channel_names[column]].iloc[index],obj2.pdData[channel_names[column]].iloc[index])
         self.assertEqual(obj.pdData.shape[0],obj2.pdData.shape[0])
         self.assertEqual(obj.pdData.shape[1],obj2.pdData.shape[1])
@@ -1065,11 +1092,165 @@ class TestGraph(unittest.TestCase):
         index = randint(0,7199)
         obj = Graphing(infile, hexflag = hexfile)
         obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        col = obj.pdData.loc[:,'Time']
+        col = col.notna().to_numpy()
+        idx = np.where(col == True)
+        idx = list(idx[0])
         obj.ext_time_d()
-        while obj.pdData['Time_r'].iloc[index] is not None:
+        while index in idx:
             index = randint(0,7199)
-        self.assertIsNotNone(obj.pdData.shape[0],7200)
-            
+        self.assertIsNotNone(obj.pdData["Time"].iloc[index])
+
+    def test_single_hist(self):
+        infile = "tests/singlefile.txt"
+        hexfile = False
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        obj.Histogram_data()
+        self.assertEqual(obj.bins_w[0],0)
+        self.assertEqual(obj.bins_w[1],1)
+        self.assertEqual(obj.bins_w[2],2)
+        self.assertEqual(obj.bins_w[3],3)
+        self.assertEqual(obj.bins_w[4],4)
+        self.assertEqual(obj.bins_w[5],5)
+        self.assertEqual(obj.bins_w[6],6)
+        self.assertEqual(obj.bins_w[7],7)
+        self.assertEqual(obj.bins_w[8],8)
+        self.assertEqual(obj.bins_w[9],9)
+        self.assertEqual(obj.bins_w[10],10)
+        self.assertEqual(obj.bins_w[11],11)
+        self.assertEqual(obj.bins_w[12],12)
+        self.assertEqual(obj.bins_w[13],13)
+        self.assertEqual(obj.bins_w[14],14)
+        self.assertEqual(obj.bins_w[15],15)
+        self.assertEqual(obj.bins_w[16],16)
+        self.assertEqual(obj.bins_w[17],17)
+        self.assertEqual(obj.bins_w[18],18)
+        
+        self.assertEqual(obj.counts_w[0],0)
+        self.assertEqual(obj.counts_w[1],0)
+        self.assertEqual(obj.counts_w[2],0)
+        self.assertEqual(obj.counts_w[3],0)
+        self.assertEqual(obj.counts_w[4],0)
+        self.assertEqual(obj.counts_w[5],0)
+        self.assertEqual(obj.counts_w[6],0)
+        self.assertEqual(obj.counts_w[7],0)
+        self.assertEqual(obj.counts_w[8],0)
+        self.assertEqual(obj.counts_w[9],0)
+        self.assertEqual(obj.counts_w[10],0)
+        self.assertEqual(obj.counts_w[11],0)
+        self.assertEqual(obj.counts_w[12],0)
+        self.assertEqual(obj.counts_w[13],0)
+        self.assertEqual(obj.counts_w[14],0)
+        self.assertEqual(obj.counts_w[15],6299)
+        self.assertEqual(obj.counts_w[16],901)
+        self.assertEqual(obj.counts_w[17],0)
+
+        self.assertEqual(obj.bins_d[0],0)
+        self.assertEqual(obj.bins_d[1],1)
+        self.assertEqual(obj.bins_d[2],2)
+        self.assertEqual(obj.bins_d[3],3)
+        self.assertEqual(obj.bins_d[4],4)
+        self.assertEqual(obj.bins_d[5],5)
+        self.assertEqual(obj.bins_d[6],6)
+        self.assertEqual(obj.bins_d[7],7)
+        self.assertEqual(obj.bins_d[8],8)
+        self.assertEqual(obj.bins_d[9],9)
+        self.assertEqual(obj.bins_d[10],10)
+
+        self.assertEqual(obj.counts_d[0],0)
+        self.assertEqual(obj.counts_d[1],0)
+        self.assertEqual(obj.counts_d[2],0)
+        self.assertEqual(obj.counts_d[3],0)
+        self.assertEqual(obj.counts_d[4],0)
+        self.assertEqual(obj.counts_d[5],0)
+        self.assertEqual(obj.counts_d[6],0)
+        self.assertEqual(obj.counts_d[7],0)
+        self.assertEqual(obj.counts_d[8],899)
+        self.assertEqual(obj.counts_d[9],0)
+
+    def test_scale_data(self):
+        infile = "tests/singlefile.txt"
+        hexfile = False
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        channel_names = ["DC-v","Sph-V","Rph-V","Rph-I","Sph-I","DCv-Min","SphV-Min","RphV-Min","RphI-Min","SphI-Min","DCv-MAX", "SphV-MAX","RphV-MAX","RphI-MAX","SphI-MAX"]
+        obj.name_channel(channel_names)
+        scale_factors = [(2440/97310), 65/2322.3006944444446]
+        columns = [["DCv-Min","DC-v","Sph-V","Rph-V","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"], ["Rph-I","Sph-I","RphI-Min","SphI-Min","RphI-MAX","SphI-MAX"]]
+        for idx in range(len(columns)):
+            obj.Convert_channel(columns[idx],scale_factors[idx])
+        self.assertEqual(round(obj.pdData['DC-v'].iloc[0],2), 1.38)
+        self.assertEqual(round(obj.pdData['Sph-V'].iloc[0],2), 245.91)
+        self.assertEqual(round(obj.pdData['Rph-V'].iloc[0],2), 245.86)
+        self.assertEqual(round(obj.pdData['Rph-I'].iloc[0],2), 1.60)
+        self.assertEqual(round(obj.pdData['Sph-I'].iloc[0],2), 1.06)
+        self.assertEqual(round(obj.pdData['DCv-Min'].iloc[0],2), 0.98)
+        self.assertEqual(round(obj.pdData['SphV-Min'].iloc[0],2), 245.40)
+        self.assertEqual(round(obj.pdData['RphV-Min'].iloc[0],2), 245.48)
+        self.assertEqual(round(obj.pdData['RphI-Min'].iloc[0],2), 1.48)
+        self.assertEqual(round(obj.pdData['SphI-Min'].iloc[0],2), 0.98)
+        self.assertEqual(round(obj.pdData['DCv-MAX'].iloc[0],2), 1.73)
+        self.assertEqual(round(obj.pdData['SphV-MAX'].iloc[0],2), 246.53)
+        self.assertEqual(round(obj.pdData['RphV-MAX'].iloc[0],2), 246.38)
+        self.assertEqual(round(obj.pdData['RphI-MAX'].iloc[0],2), 1.76)
+        self.assertEqual(round(obj.pdData['SphI-MAX'].iloc[0],2), 1.20)
+        
+    def test_average_scale(self):
+        infile = "tests/singlefile.txt"
+        hexfile = False
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        avg_cols ="DC-v"
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        channel_names = ["DC-v","Sph-V","Rph-V","Rph-I","Sph-I","DCv-Min","SphV-Min","RphV-Min","RphI-Min","SphI-Min","DCv-MAX", "SphV-MAX","RphV-MAX","RphI-MAX","SphI-MAX"]
+        obj.name_channel(channel_names)
+        obj.print_avg(columns = avg_cols)
+        obj.Convert_channel(avg_cols,1.38/obj.averages)
+        self.assertEqual(round(obj.averages),55)
+        self.assertEqual(round(obj.pdData['DC-v'].iloc[0],2), 1.38)
+
+    def test_real_graphs(self):
+        infile = "tests/singlefile.txt"
+        hexfile = False
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        obj.mkGraph_true(specific = None, start_time = None)
+
+    def test_real_graphs_all(self):
+        infile = "tests/singlefile.txt"
+        hexfile = False
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        obj.mkGraph_all_true(start_time = None)
+
+    def test_add_graphs(self):
+        infile = "tests/singlefile.txt"
+        hexfile = False
+        histwidth = None
+        histwidth_t = None
+        pglen = None
+        obj = Graphing(infile, hexflag = hexfile)
+        obj.mkdata(width = histwidth, width_t = histwidth_t, depth = pglen)
+        obj.ext_time_d()
+        obj.mkGraph_add(specific = None, start_time = None)
+        
+
+        
 # Main area testing and funtions.
 if __name__ == "__main__":
     #test= Graphing("2022-10-24__07_00.txt")

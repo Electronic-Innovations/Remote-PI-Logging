@@ -60,7 +60,7 @@ if __name__ == "__main__":
     pglen = 8
 
     # Set to true if you wish to save the data frame as a csv
-    save = True
+    save = False
     # Copression type ('zip' or 'gzip' only at the moment)
     compression = 'zip'
 
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     startGS = [None, None]
 
     # Set to true to plot single plots using all the available data
-    Graph_all = True
+    Graph_all = False
     # Number of plots to create 
     numberGA = 1
     # List of specific channels (None indicates all on one plot)
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     # Set to True to produce a subplot with 3 plots 
     subplot = True
     # A list of lists containg the data columns to be plotted on each subplot 
-    subplotdata = [["DC-v"],["Sph-V","Rph-V"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]]
+    subplotdata = [["DCv-Min","DCv-MAX"],["SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"],["SphI-Min","SphI-MAX","RphI-Min","RphI-MAX"]]
     # Labels for each yaxis of the plot
     subplot_ylabels = ["Volts (V)", "Volts (V)","Current (A)"]
     # Label for the shared xaxis of the plot
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     # Super label for the Y axis (can be left blank )
     subplot_yaxis = "Out Current, Mains and DC Converter"
     # Set of Y limits for each subplot
-    subplot_ylim = [[None, None], [200, 260], [None,None]]
+    subplot_ylim = [[None, None], [200, 260], [-10,90]]
 
     # Set to true to produce a sing plot with 2 y-axis
     ploty2 = False

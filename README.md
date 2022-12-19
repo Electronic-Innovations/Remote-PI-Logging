@@ -78,6 +78,14 @@ The cronjob for this task will need to be implemented on a case-by-case basis ho
           30 12 * * *  ./Remote-PI-Logging/Cleanup.py  >> removed.out
 
 This will perform a check at 12:30pm everyday to ensure the memory has more than 2Gb of space. See the Cronjob logging section for more information about the crontab.
+It should be noted that **datatext.txt** and **test.out** are not removed by this script and continue to grow, these will need to be removed manually by a user using the follwoing commands from the home directory 
+
+      rm test.out
+      rm datatext.txt
+      touch test.out
+      touch datatext.txt
+      
+This will remove them and create empty files in their place.
 
 ### loggingGit.py
 

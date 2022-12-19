@@ -122,11 +122,11 @@ Finally if processing multiple data files it is recomended to do preliminary plo
 As this will significantly reduce the subsequent processing time for creating specific and more precise plots as the data will have to be processed every time. It is much quicker just to load in a csv.zip 
 ### TO DO
 
-Reassess the padding functionality of loggingGit.py as the graphing utility does not require it and it may be redundant.
+Reassess the padding functionality of loggingGit.py as the graphing utility does not require it and it may be redundant. (currently completely not utilised by the python graphing utility)
 
-File containing only timestamped data (Ross) - can plot exclusively stamped data 
+File containing only timestamped data (Ross) - can plot exclusively stamped data (Can be done using the graphing utility)
 
-Addnig timestamps to all data points - done in the graphin utility 
+Addnig timestamps to all data points - done in the graphing utility 
 
 Graphana or other web server plotting 
 

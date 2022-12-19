@@ -43,6 +43,7 @@ if (freeGB<2):
         total, used, free = shutil.disk_usage('/home/pi/data_backup')
         freeGB = free/1024/1024/1024
         if freeGB>2:
+            print(str(freeGB) + " Gb of Free Space")
             break
         
         # remove oldest padfile
@@ -52,9 +53,12 @@ if (freeGB<2):
             #freeGB = freeGB +0.5
         else:    ## Show an error ##
             print("Error: file not found:" + files2[i])
+
+        # Check if Space requirement is met
         total, used, free = shutil.disk_usage('/home/pi/data_backup')
         freeGB = free/1024/1024/1024
         if freeGB>2:
+            print(str(freeGB) + " Gb of Free Space")
             break
 quit()
 

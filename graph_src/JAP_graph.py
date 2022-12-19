@@ -21,7 +21,7 @@ if __name__ == "__main__":
     # Data Input and dataframe building config #
 
     # Single data file flag set to true if only using a single data file
-    single_file = False
+    single_file = True
     # Directory containing only the data files to be used for multiple file processing (single_file = False)
     filedir = "TD_SA/2022-12"
     # Type of file in directory to search for (".txt" or ".dta" only)
@@ -29,9 +29,9 @@ if __name__ == "__main__":
     # If using mutilple files specify the name for the out file (if saving)
     outfile = "TD_SA/SA_Dec.txt"
     # If using a single file specify it 
-    infile = "Perth_test_INST02.txt"
+    infile = "TD_SA/2022-12-19__10_00.txt"
     # Specify using presaved csv.zip data (will override single file and multiple file specifications)
-    OpenCsv = True
+    OpenCsv = False
     # Csv.zip file name/path
     csvfile = "TD_SA/SA_DecNew.csv.zip"
     # Specify if the data is in hexadecimal 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     # Specify if all data should be plotted ('Time_all') or only time stamped data ('Time_real') for Subplots ansd 2yplot
     data_method = 'Time_all'
     # Specify if data columns should be scaled 
-    scaling = False
+    scaling = True
     # Provide a list of columns to be scaled (list of list if they are scaled by the same factor )
     columns = [["DCv-Min","DC-v","Sph-V","Rph-V","DCv-MAX","SphV-Min","SphV-MAX","RphV-Min","RphV-MAX"], ["Rph-I","Sph-I","RphI-Min","SphI-Min","RphI-MAX","SphI-MAX"]]
     # A list of scaling factors to be multiplied by the values in the columns

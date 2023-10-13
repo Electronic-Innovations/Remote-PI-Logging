@@ -27,11 +27,18 @@ The RPi is set up for scheduled running of the loggingGit.py script (information
 
 This will open up the cron tab editor. The last line of this file is the section for running the cronjob it should look like this: _(this line may be incorrect in CLEAN installations)_.
 
-      #0 * * * *  ./Remote-PI-Logging/loggingGit.py  >> test.out
+      #0 * * * *  /home/pi/Remote-PI-Logging/loggingGit.py  >> test.out
 
-By uncommenting this line and saving the file (**ctrl+x** then **y** then **enter**) the cronjob will run every hour. The logging and output information and any error messages can be found in **test.out**. This frequency can change by adjusting the '0 * * * *' at the start of the line. More information about how to adjust these values can be found [here](https://crontab.guru). It should be noted that it does take time for the EDM to print all of its data. should there be any serial issues (partial reads) the program will wait for 15min on the serial port before proceeding. Please take this into account.
+By uncommenting this line and saving the file (**ctrl+x** then **y** then **enter**) the cronjob will run every hour. The logging and output information and any error messages can be found in **test.out**. This frequency can change by adjusting the '0 * * * *' at the start of the line. More information about how to adjust these values can be found at [Crontab Guru](https://crontab.guru). It should be noted that it does take time for the EDM to print all of its data. should there be any serial issues (partial reads) the program will wait for 15min on the serial port before proceeding. Please take this into account.
 
 Ensure to disable this functionality when using minicom for extended periods of time or when reprogramming the EDM. This can be done by editing the tab and commenting out the line.
+
+An example of the crontab entries are shown below.
+
+	0 * * * *  /home/pi/Remote-PI-Logging/loggingGit.py  >> test.out
+	55 * * * * pkill minicom
+	30 12 * * *  /home/pi/Remote-PI-Logging/Cleanup.py  >> removed.out
+	20-50 0-23/1 * * * /home/pi/Remote-PI-Logging/loggingJGRAB.py >> testJGRAB.out
 
 ## Available Programs 
 There are currently 4 available programs to assist with logging data from the EDM, programming the EDM and cycling power to the EDM (if relays are connected)
@@ -141,3 +148,5 @@ Graphana or other web server plotting
 Compression and data management - graphing utility saves data to a compressed csv
 - using numpy and scipy to store the concatenated data for MATLAB
 - potentially making the storage of the padded files optional (ie removing them after appending)
+
+git clone https://github.com/Electronic-Innovations/Remote-PI-Logging.git

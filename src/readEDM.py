@@ -207,7 +207,7 @@ class EDMSerial:
         try:
             #start timer to ensure the program doesn't get stuck
             tic=timeit.default_timer()
-            print("writing to EDM: 'd 24 5 * 60 M* -SSPRD'")
+            print("writing to EDM: ", command)
             # clear the stack for the EDM
             send = ' ..\r'
             com.write(send.encode())

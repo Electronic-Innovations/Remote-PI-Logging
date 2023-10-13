@@ -10,7 +10,7 @@ from src.padding import PADDING
 # get the current date time
 now = datetime.datetime.now()
 d1 = now.strftime("%Y-%m-%d__%H_%M")
-filenametxt = 'jgrab/'+d1+'.txt'
+filenametxt = '~/jgrab/' + d1 + '-JGRAB.txt'
 
 #create object for reading data in from the serial port
 com = EDMSerial()

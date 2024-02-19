@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-
+#testLSGgit
 '''
 This program is wriiten to automatically clean the memory of the RPi so that it does not fill up
 It will remove the oldest files indicated by ther filenames untill there is 2GB of free space. The datatext.txt file will need to be cleared mannualy.
